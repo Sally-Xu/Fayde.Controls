@@ -58,4 +58,19 @@ module Fayde.Controls {
         Both,
     }
     Library.addEnum(StretchDirection, "StretchDirection");
+
+    export enum CalendarMode {
+        Month = 1,
+        Year = 2,       
+        Decade = 3
+    }
+    Library.addEnum(CalendarMode, "CalendarMode");
+
+    export enum CalendarSelectionMode {
+        SingleDate = 1,
+        SingleRange = 2,
+        MultipleRange = 3,
+        None = 4,
+    }
+    Library.addEnum(CalendarSelectionMode, "CalendarSelectionMode");   
 }

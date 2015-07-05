@@ -1,0 +1,432 @@
+﻿<ResourceDictionary
+        xmlns="http://schemas.wsick.com/fayde"
+        xmlns:x="http://schemas.wsick.com/fayde/x"
+        xmlns:vsm="http://schemas.wsick.com/fayde"
+        xmlns:controls="lib://fayde.controls"
+        xmlns:controlsPrimitives="lib://fayde.controls/Primitives">
+
+  <!--<Style TargetType="controls:Calendar">
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Background">
+      <Setter.Value>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+          <GradientStop Color="#FFD3DEE8" Offset="0" />
+          <GradientStop Color="#FFD3DEE8" Offset="0.16" />
+          <GradientStop Color="#FFFCFCFD" Offset="0.16" />
+          <GradientStop Color="#FFFFFFFF" Offset="1" />
+        </LinearGradientBrush>
+      </Setter.Value>
+    </Setter>
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush">
+      <Setter.Value>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+          <GradientStop Color="#FFA3AEB9" Offset="0" />
+          <GradientStop Color="#FF8399A9" Offset="0.375" />
+          <GradientStop Color="#FF718597" Offset="0.375" />
+          <GradientStop Color="#FF617584" Offset="1" />
+        </LinearGradientBrush>
+      </Setter.Value>
+    </Setter>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="controls:Calendar">
+          <StackPanel x:Name="Root" HorizontalAlignment="Center">
+            <controlsPrimitives:CalendarItem x:Name="CalendarItem"  Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" />
+          </StackPanel>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>-->
+
+  <Style TargetType="controls:Calendar">
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Background">
+      <Setter.Value>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+          <GradientStop Color="#FFD3DEE8" Offset="0" />
+          <GradientStop Color="#FFD3DEE8" Offset="0.16" />
+          <GradientStop Color="#FFFCFCFD" Offset="0.16" />
+          <GradientStop Color="#FFFFFFFF" Offset="1" />
+        </LinearGradientBrush>
+      </Setter.Value>
+    </Setter>
+    <Setter Property="BorderThickness" Value="1" />  
+    <Setter Property="BorderBrush">
+      <Setter.Value>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+          <GradientStop Color="#FFA3AEB9" Offset="0" />
+          <GradientStop Color="#FF8399A9" Offset="0.375" />
+          <GradientStop Color="#FF718597" Offset="0.375" />
+          <GradientStop Color="#FF617584" Offset="1" />
+        </LinearGradientBrush>
+      </Setter.Value>
+    </Setter>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="controls:Calendar">
+          <Grid x:Name="Root" HorizontalAlignment="Center">
+            <Grid.Resources>
+              <SolidColorBrush x:Key="DisabledBrush" Color="#8CFFFFFF" />
+            </Grid.Resources>
+            <vsm:VisualStateManager.VisualStateGroups>
+              <vsm:VisualStateGroup x:Name="CommonStates">
+                <vsm:VisualState x:Name="Normal" />
+                <vsm:VisualState x:Name="Disabled">
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="DisabledVisual" Storyboard.TargetProperty="Opacity" To="1" Duration="0" />
+                  </Storyboard>
+                </vsm:VisualState>
+              </vsm:VisualStateGroup>
+            </vsm:VisualStateManager.VisualStateGroups>
+
+            <Border BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" Margin="0,2,0,2" CornerRadius="1" >
+              <Border CornerRadius="1" BorderBrush="#FFFFFFFF" BorderThickness="1">
+                <Grid>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                  </Grid.RowDefinitions>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+
+                  <Grid.Resources>
+                    <ControlTemplate x:Key="HeaderButtonTemplate" TargetType="Button">
+                      <Grid Cursor="Hand">
+                        <vsm:VisualStateManager.VisualStateGroups>
+                          <vsm:VisualStateGroup x:Name="CommonStates">
+                            <vsm:VisualState x:Name="Normal" />
+                            <vsm:VisualState x:Name="MouseOver">
+                              <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="Content" Storyboard.TargetProperty="(ContentControl.Foreground).(SolidColorBrush.Color)" To="#FF73A9D8" Duration="0" />
+                              </Storyboard>
+                            </vsm:VisualState>
+                            <vsm:VisualState x:Name="Disabled">
+                              <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="Content" Storyboard.TargetProperty="Opacity" To=".5" Duration="0" />
+                              </Storyboard>
+                            </vsm:VisualState>
+                          </vsm:VisualStateGroup>
+                        </vsm:VisualStateManager.VisualStateGroups>
+
+                        <ContentControl x:Name="Content" IsTabStop="False" FontSize="{TemplateBinding FontSize}" Foreground="#FF333333" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Margin="1,5,1,9" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                      </Grid>
+                    </ControlTemplate>
+
+                    <DataTemplate x:Name="DayTitleTemplate">
+                      <TextBlock FontWeight="Bold" FontSize="9.5" Text="{Binding}" Margin="0,4,0,4" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </DataTemplate>
+
+                    <ControlTemplate x:Key="PreviousButtonTemplate" TargetType="Button">
+                      <Grid Cursor="Hand">
+                        <vsm:VisualStateManager.VisualStateGroups>
+                          <vsm:VisualStateGroup x:Name="CommonStates">
+                            <vsm:VisualState x:Name="Normal" />
+                            <vsm:VisualState x:Name="MouseOver">
+                              <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="IconPath" Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Color)" To="#FF73A9D8" Duration="0" />
+                              </Storyboard>
+                            </vsm:VisualState>
+                            <vsm:VisualState x:Name="Disabled">
+                              <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="IconPath" Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Opacity)" To=".5" Duration="0" />
+                              </Storyboard>
+                            </vsm:VisualState>
+                          </vsm:VisualStateGroup>
+                        </vsm:VisualStateManager.VisualStateGroups>
+
+                        <Rectangle Fill="#11E5EBF1" Stretch="Fill" Opacity="1" />
+                        <Grid>
+                          <Path x:Name="IconPath" Fill="#FF333333" Margin="14,-6,0,0" Height="10" Width="6" VerticalAlignment="Center" HorizontalAlignment="Left" Stretch="Fill" Data="M288.75,232.25 L288.75,240.625 L283,236.625 z" />
+                        </Grid>
+                      </Grid>
+                    </ControlTemplate>
+
+                    <ControlTemplate x:Key="NextButtonTemplate" TargetType="Button">
+                      <Grid Cursor="Hand">
+                        <vsm:VisualStateManager.VisualStateGroups>
+                          <vsm:VisualStateGroup x:Name="CommonStates">
+                            <vsm:VisualState x:Name="Normal" />
+                            <vsm:VisualState x:Name="MouseOver">
+                              <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="IconPath" Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Color)" To="#FF73A9D8" Duration="0" />
+                              </Storyboard>
+                            </vsm:VisualState>
+                            <vsm:VisualState x:Name="Disabled">
+                              <Storyboard>
+                                <DoubleAnimation Storyboard.TargetName="IconPath" Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Opacity)" To=".5" Duration="0" />
+                              </Storyboard>
+                            </vsm:VisualState>
+                          </vsm:VisualStateGroup>
+                        </vsm:VisualStateManager.VisualStateGroups>
+
+                        <Rectangle Fill="#11E5EBF1" Stretch="Fill" Opacity="1" />
+                        <Grid>
+                          <Path x:Name="IconPath" Fill="#FF333333" Margin="0,-6,14,0" Height="10" Width="6" Stretch="Fill" VerticalAlignment="Center" HorizontalAlignment="Right" Data="M282.875,231.875 L282.875,240.375 L288.625,236 z" />
+                        </Grid>
+                      </Grid>
+                    </ControlTemplate>
+                  </Grid.Resources>
+
+                  <Button x:Name="PreviousButton" Height="20" Width="28" Visibility="Collapsed" Template="{StaticResource PreviousButtonTemplate}" HorizontalAlignment="Left" />
+
+                  <Button x:Name="HeaderButton" Grid.Column="1" FontWeight="Bold" FontSize="10.5" Template="{StaticResource HeaderButtonTemplate}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                  <Button x:Name="NextButton" Grid.Column="2" Height="20" Width="28" Visibility="Collapsed" Template="{StaticResource NextButtonTemplate}" HorizontalAlignment="Right" />
+
+                  <Grid x:Name="MonthView" Grid.Row="1" Grid.ColumnSpan="3" Visibility="Collapsed" Margin="6,-1,6,6">
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                  </Grid>
+
+                  <Grid x:Name="YearView" Grid.Row="1" Grid.ColumnSpan="3" Visibility="Collapsed" Margin="6,-3,7,6">
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="*" />
+                      <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                  </Grid>
+                </Grid>
+              </Border>
+            </Border>
+            <Rectangle x:Name="DisabledVisual" Opacity="0" Visibility="Collapsed" Stretch="Fill" RadiusX="2" RadiusY="2" StrokeThickness="1" Stroke="{StaticResource DisabledBrush}" Fill="{StaticResource DisabledBrush}" Margin="0,2,0,2" />
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="controlsPrimitives:CalendarButton">
+    <Setter Property="Background" Value="#FFBADDE9" />
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="MinWidth" Value="40" />
+    <Setter Property="MinHeight" Value="42" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="controlsPrimitives:CalendarButton">
+          <Grid>
+            <vsm:VisualStateManager.VisualStateGroups>
+              <vsm:VisualStateGroup x:Name="CommonStates">
+                <vsm:VisualStateGroup.Transitions>
+                  <vsm:VisualTransition GeneratedDuration="0:0:0.1" />
+                </vsm:VisualStateGroup.Transitions>
+                <vsm:VisualState x:Name="Normal" />
+                <vsm:VisualState x:Name="MouseOver">
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Background" Storyboard.TargetProperty="Opacity" To=".5" Duration="0" />
+                  </Storyboard>
+                </vsm:VisualState>
+                <vsm:VisualState x:Name="Pressed">
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Background" Storyboard.TargetProperty="Opacity" To=".5" Duration="0" />
+                  </Storyboard>
+                </vsm:VisualState>
+              </vsm:VisualStateGroup>
+              <vsm:VisualStateGroup x:Name="SelectionStates">
+                <vsm:VisualStateGroup.Transitions>
+                  <vsm:VisualTransition GeneratedDuration="0" />
+                </vsm:VisualStateGroup.Transitions>
+                <vsm:VisualState x:Name="Unselected"/>                  
+                <vsm:VisualState x:Name="Selected">
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="SelectedBackground" Storyboard.TargetProperty="Opacity" To=".75" Duration="0" />
+                  </Storyboard>
+                </vsm:VisualState>
+              </vsm:VisualStateGroup>
+              <vsm:VisualStateGroup x:Name="ActiveStates">
+                <vsm:VisualStateGroup.Transitions>
+                  <vsm:VisualTransition GeneratedDuration="0" />
+                </vsm:VisualStateGroup.Transitions>
+                <vsm:VisualState x:Name="Active" />
+                <vsm:VisualState x:Name="Inactive">
+                  <Storyboard>
+                    <ColorAnimation Storyboard.TargetName="Content" Storyboard.TargetProperty="(ContentControl.Foreground).(SolidColorBrush.Color)" To="#FF777777" Duration="0" />
+                  </Storyboard>
+                </vsm:VisualState>
+              </vsm:VisualStateGroup>
+              <vsm:VisualStateGroup x:Name="FocusStates">
+                <vsm:VisualStateGroup.Transitions>
+                  <vsm:VisualTransition GeneratedDuration="0" />
+                </vsm:VisualStateGroup.Transitions>
+                <vsm:VisualState x:Name="Focused">
+                  <Storyboard>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="FocusVisual" Storyboard.TargetProperty="Visibility" Duration="0">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="Visible" />
+                    </ObjectAnimationUsingKeyFrames>
+                  </Storyboard>
+                </vsm:VisualState>
+                <vsm:VisualState x:Name="Unfocused">
+                  <Storyboard>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="FocusVisual" Storyboard.TargetProperty="Visibility" Duration="0">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed" />
+                    </ObjectAnimationUsingKeyFrames>
+                  </Storyboard>
+                </vsm:VisualState>
+              </vsm:VisualStateGroup>
+            </vsm:VisualStateManager.VisualStateGroups>
+
+            <Rectangle x:Name="SelectedBackground" RadiusX="5" RadiusY="5" Opacity="0" Fill="{TemplateBinding Background}" />
+            <Rectangle x:Name="Background" RadiusX="1" RadiusY="1" Opacity="0" Fill="{TemplateBinding Background}" />
+
+            <ContentControl x:Name="Content" IsTabStop="False" Foreground="#FF333333" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" FontSize="{TemplateBinding FontSize}" Margin="1,0,1,1" />
+
+            <Rectangle x:Name="FocusVisual" Visibility="Collapsed" IsHitTestVisible="false" RadiusX="1" RadiusY="1" Stroke="#FF6DBDD1" />
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  
+  <Style TargetType="controlsPrimitives:CalendarDayButton" >
+    <Setter Property="Background" Value="#FFBADDE9" />
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="MinWidth" Value="5" />
+    <Setter Property="MinHeight" Value="5" />  
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="controlsPrimitives:CalendarDayButton">
+          <Grid>
+            <vsm:VisualStateManager.VisualStateGroups>
+              <vsm:VisualStateGroup x:Name="CommonStates">
+                <vsm:VisualStateGroup.Transitions>
+                  <vsm:VisualTransition GeneratedDuration="0:0:0.1" />
+                </vsm:VisualStateGroup.Transitions>
+                <vsm:VisualState x:Name="Normal" />
+                <vsm:VisualState x:Name="MouseOver">
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Background" Storyboard.TargetProperty="Opacity" To=".5" Duration="0" />
+                  </Storyboard>
+                </vsm:VisualState>
+                <vsm:VisualState x:Name="Pressed">
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Background" Storyboard.TargetProperty="Opacity" To=".5" Duration="0" />
+                  </Storyboard>
+                </vsm:VisualState>
+                <vsm:VisualState x:Name="Disabled">
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Background" Storyboard.TargetProperty="Opacity" To="0" Duration="0" />
+                    <DoubleAnimation Storyboard.TargetName="Content" Storyboard.TargetProperty="Opacity" To=".35" Duration="0" />
+                  </Storyboard>
+                </vsm:VisualState>
+              </vsm:VisualStateGroup>
+              <vsm:VisualStateGroup x:Name="SelectionStates">
+                <vsm:VisualStateGroup.Transitions>
+                  <vsm:VisualTransition GeneratedDuration="0" />
+                </vsm:VisualStateGroup.Transitions>
+                <vsm:VisualState x:Name="Unselected" />
+                <vsm:VisualState x:Name="Selected">
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="SelectedBackground" Storyboard.TargetProperty="Opacity" To=".75" Duration="0" />
+                  </Storyboard>
+                </vsm:VisualState>
+              </vsm:VisualStateGroup>
+              <vsm:VisualStateGroup x:Name="FocusStates">
+                <vsm:VisualStateGroup.Transitions>
+                  <vsm:VisualTransition GeneratedDuration="0" />
+                </vsm:VisualStateGroup.Transitions>
+                <vsm:VisualState x:Name="Focused">
+                  <Storyboard>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="FocusVisual" Storyboard.TargetProperty="Visibility" Duration="0">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="Visible" />
+                    </ObjectAnimationUsingKeyFrames>
+                  </Storyboard>
+                </vsm:VisualState>
+                <vsm:VisualState x:Name="Unfocused">
+                  <Storyboard>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="FocusVisual" Storyboard.TargetProperty="Visibility" Duration="0">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed" />
+                    </ObjectAnimationUsingKeyFrames>
+                  </Storyboard>
+                </vsm:VisualState>
+              </vsm:VisualStateGroup>
+              <vsm:VisualStateGroup x:Name="ActiveStates">
+                <vsm:VisualStateGroup.Transitions>
+                  <vsm:VisualTransition GeneratedDuration="0" />
+                </vsm:VisualStateGroup.Transitions>
+                <vsm:VisualState x:Name="Active" />
+                <vsm:VisualState x:Name="Inactive">
+                  <Storyboard>
+                    <ColorAnimation Storyboard.TargetName="Content" Storyboard.TargetProperty="(ContentControl.Foreground).(GradientBrush.GradientStops)[2].(GradientStop.Color)" To="#FF777777" Duration="0" />
+                    <ColorAnimation Storyboard.TargetName="Content" Storyboard.TargetProperty="(ContentControl.Foreground).(GradientBrush.GradientStops)[3].(GradientStop.Color)" To="#FF777777" Duration="0" />
+                  </Storyboard>
+                </vsm:VisualState>
+              </vsm:VisualStateGroup>
+              <vsm:VisualStateGroup x:Name="DayStates">
+                <vsm:VisualStateGroup.Transitions>
+                  <vsm:VisualTransition GeneratedDuration="0" />
+                </vsm:VisualStateGroup.Transitions>
+                <vsm:VisualState x:Name="RegularDay" />
+                <vsm:VisualState x:Name="Today">
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="TodayBackground" Storyboard.TargetProperty="Opacity" To="1" Duration="0" />
+                    <DoubleAnimation Storyboard.TargetName="Content" Storyboard.TargetProperty="(ContentControl.Foreground).(GradientBrush.GradientStops)[1].(GradientStop.Offset)" To="1" Duration="0" />
+                    <DoubleAnimation Storyboard.TargetName="Content" Storyboard.TargetProperty="(ContentControl.Foreground).(GradientBrush.GradientStops)[2].(GradientStop.Offset)" To="1" Duration="0" />
+                  </Storyboard>
+                </vsm:VisualState>
+              </vsm:VisualStateGroup>
+              <vsm:VisualStateGroup x:Name="BlackoutDayStates">
+                <vsm:VisualStateGroup.Transitions>
+                  <vsm:VisualTransition GeneratedDuration="0" />
+                </vsm:VisualStateGroup.Transitions>
+                <vsm:VisualState x:Name="NormalDay" />
+                <vsm:VisualState x:Name="BlackoutDay">
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="BlackoutVisual" Storyboard.TargetProperty="Opacity" To=".2" Duration="0" />
+                  </Storyboard>
+                </vsm:VisualState>
+              </vsm:VisualStateGroup>
+            </vsm:VisualStateManager.VisualStateGroups>
+
+            <Rectangle x:Name="TodayBackground" RadiusX="1" RadiusY="1" Opacity="0" Fill="#FFAAAAAA" />
+            <Rectangle x:Name="SelectedBackground" RadiusX="1" RadiusY="1" Opacity="0" Fill="{TemplateBinding Background}" />
+            <Rectangle x:Name="Background" RadiusX="1" RadiusY="1" Opacity="0" Fill="{TemplateBinding Background}" />
+
+            <ContentControl x:Name="Content" IsTabStop="False" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" FontSize="{TemplateBinding FontSize}" Margin="5,1,5,1">
+              <ContentControl.Foreground>
+                <LinearGradientBrush>
+                  <GradientStop Offset="0" Color="#FFFFFFFF" />
+                  <GradientStop Offset="0" Color="#FFFFFFFF" />
+                  <GradientStop Offset="0" Color="#FF333333" />
+                  <GradientStop Offset="1" Color="#FF333333" />
+                </LinearGradientBrush>
+              </ContentControl.Foreground>
+            </ContentControl>
+
+            <Path x:Name="BlackoutVisual" Opacity="0" Margin="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransformOrigin="0.5,0.5" Fill="#FF000000" Stretch="Fill" Data="M8.1772461,11.029181 L10.433105,11.029181 L11.700684,12.801641 L12.973633,11.029181 L15.191895,11.029181 L12.844727,13.999395 L15.21875,17.060919 L12.962891,17.060919 L11.673828,15.256231 L10.352539,17.060919 L8.1396484,17.060919 L10.519043,14.042364 z" />
+            <Rectangle x:Name="FocusVisual" Visibility="Collapsed" IsHitTestVisible="false" RadiusX="1" RadiusY="1" Stroke="#FF6DBDD1" />
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+</ResourceDictionary>
