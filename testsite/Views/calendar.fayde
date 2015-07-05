@@ -5,10 +5,10 @@
       Title="Calendar Test">
 	  <Grid>     
       <StackPanel>               
-        <controls:Calendar >
+        <controls:Calendar>
         </controls:Calendar>
 
-        <controls:DatePicker SelectedDate="07/08/2015" />
+        <controls:DatePicker SelectedDate='07/08/2015' />
       </StackPanel>       
 	  </Grid>
 </Page>

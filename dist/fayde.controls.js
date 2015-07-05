@@ -73,6 +73,7 @@ var Fayde;
                 _super.call(this);
                 this.Opened = new Fayde.RoutedEvent();
                 this.Closed = new Fayde.RoutedEvent();
+                //#endregion
                 this._Owner = null;
                 this._PopupAlignmentPoint = new Point();
                 this._SettingIsOpen = false;
@@ -120,6 +121,12 @@ var Fayde;
                 e.Handled = true;
                 _super.prototype.OnMouseRightButtonDown.call(this, e);
             };
+            //#region Touch Event
+            ContextMenu.prototype.OnTouchDown = function (e) {
+                _super.prototype.OnTouchDown.call(this, e);
+                e.Handled = true;
+                this.ChildMenuItemClicked();
+            };
             Object.defineProperty(ContextMenu.prototype, "Owner", {
                 get: function () {
                     return this._Owner;
@@ -127,26 +134,42 @@ var Fayde;
                 set: function (value) {
                     if (this._Owner) {
                         var fe = this._Owner instanceof Fayde.FrameworkElement ? this._Owner : null;
-                        if (fe)
+                        if (fe) {
                             fe.MouseRightButtonDown.off(this._HandleOwnerMouseRightButtonDown, this);
+                            fe.TouchDown.off(this._HandleOwnerTouchDown, this);
+                        }
                     }
                     this._Owner = value;
                     if (!this._Owner)
                         return;
                     fe = this._Owner instanceof Fayde.FrameworkElement ? this._Owner : null;
-                    if (fe)
+                    if (fe) {
                         fe.MouseRightButtonDown.on(this._HandleOwnerMouseRightButtonDown, this);
+                        fe.TouchEnter.on(this._HandleOwnerTouchDown, this);
+                    }
                 },
                 enumerable: true,
                 configurable: true
             });
+            ContextMenu.prototype._HandleOwnerTouchDown = function (sender, e) {
+                this.OpenPopup(e.GetTouchPoint(null).Position);
+                e.Handled = true;
+            };
             ContextMenu.prototype._HandleOwnerMouseRightButtonDown = function (sender, e) {
                 this.OpenPopup(e.GetPosition(null));
                 e.Handled = true;
             };
             ContextMenu.prototype._HandleOverlayMouseButtonDown = function (sender, e) {
-                this.ClosePopup();
-                e.Handled = true;
+                if (!e.Handled) {
+                    this.ClosePopup();
+                    e.Handled = true;
+                }
+            };
+            ContextMenu.prototype._HandleOverlayTouchDown = function (sender, e) {
+                if (!e.Handled) {
+                    this.ClosePopup();
+                    e.Handled = true;
+                }
             };
             ContextMenu.prototype._HandleContextMenuSizeChanged = function (sender, e) {
                 this.UpdateContextMenuPlacement();
@@ -175,6 +198,7 @@ var Fayde;
                 this._Overlay = canvas1;
                 this._Overlay.MouseLeftButtonDown.on(this._HandleOverlayMouseButtonDown, this);
                 this._Overlay.MouseRightButtonDown.on(this._HandleOverlayMouseButtonDown, this);
+                this._Overlay.TouchDown.on(this._HandleOverlayTouchDown, this);
                 this._Overlay.Children.Add(this);
                 var popup = this._Popup = new Controls.Primitives.Popup();
                 var initiator = this._Owner;
@@ -333,6 +357,8 @@ var Fayde;
                     this._SelectionHandler.Dispose();
                 this._SelectionHandler = new Controls.Internal.SelectionHandler([this._MonthTextBox, this._DayTextBox, this._YearTextBox]);
                 this._UpdateText();
+                console.log("SelectedDate on " + this.Name + " is DateTime? " + (this.SelectedDate instanceof DateTime));
+                console.log("Type of SelectedDate on " + this.Name + " is " + (typeof this.SelectedDate));
             };
             DatePicker.prototype.CoerceMonth = function (month) {
                 month = Math.max(1, Math.min(12, month));
@@ -375,7 +401,7 @@ var Fayde;
             DatePicker.SelectedMonthProperty = DependencyProperty.Register("SelectedMonth", function () { return Number; }, DatePicker, NaN, function (d, args) { return d.OnSelectedMonthChanged(args); });
             DatePicker.SelectedDayProperty = DependencyProperty.Register("SelectedDay", function () { return Number; }, DatePicker, NaN, function (d, args) { return d.OnSelectedDayChanged(args); });
             DatePicker.SelectedYearProperty = DependencyProperty.Register("SelectedYear", function () { return Number; }, DatePicker, NaN, function (d, args) { return d.OnSelectedYearChanged(args); });
-            DatePicker.SelectedDateProperty = DependencyProperty.Register("SelectedDate", function () { return DateTime; }, DatePicker, undefined, function (d, args) { return d.OnSelectedDateChanged(args); });
+            DatePicker.SelectedDateProperty = DependencyProperty.Register("SelectedDate", function () { return DateTime; }, DatePicker, DateTime.Today, function (d, args) { return d.OnSelectedDateChanged(args); });
             return DatePicker;
         })(Controls.Control);
         Controls.DatePicker = DatePicker;
@@ -453,6 +479,21 @@ var Fayde;
         })(Controls.StretchDirection || (Controls.StretchDirection = {}));
         var StretchDirection = Controls.StretchDirection;
         Controls.Library.addEnum(StretchDirection, "StretchDirection");
+        (function (CalendarMode) {
+            CalendarMode[CalendarMode["Month"] = 1] = "Month";
+            CalendarMode[CalendarMode["Year"] = 2] = "Year";
+            CalendarMode[CalendarMode["Decade"] = 3] = "Decade";
+        })(Controls.CalendarMode || (Controls.CalendarMode = {}));
+        var CalendarMode = Controls.CalendarMode;
+        Controls.Library.addEnum(CalendarMode, "CalendarMode");
+        (function (CalendarSelectionMode) {
+            CalendarSelectionMode[CalendarSelectionMode["SingleDate"] = 1] = "SingleDate";
+            CalendarSelectionMode[CalendarSelectionMode["SingleRange"] = 2] = "SingleRange";
+            CalendarSelectionMode[CalendarSelectionMode["MultipleRange"] = 3] = "MultipleRange";
+            CalendarSelectionMode[CalendarSelectionMode["None"] = 4] = "None";
+        })(Controls.CalendarSelectionMode || (Controls.CalendarSelectionMode = {}));
+        var CalendarSelectionMode = Controls.CalendarSelectionMode;
+        Controls.Library.addEnum(CalendarSelectionMode, "CalendarSelectionMode");
     })(Controls = Fayde.Controls || (Fayde.Controls = {}));
 })(Fayde || (Fayde = {}));
 /// <reference path="Enums.ts" />
@@ -3364,6 +3405,883 @@ var Fayde;
             return UpDownParsingEventArgs;
         })(Fayde.RoutedEventArgs);
         Controls.UpDownParsingEventArgs = UpDownParsingEventArgs;
+    })(Controls = Fayde.Controls || (Fayde.Controls = {}));
+})(Fayde || (Fayde = {}));
+var Fayde;
+(function (Fayde) {
+    var Controls;
+    (function (Controls) {
+        var BlackDatesCollection = (function (_super) {
+            __extends(BlackDatesCollection, _super);
+            function BlackDatesCollection() {
+                _super.apply(this, arguments);
+            }
+            BlackDatesCollection.prototype.CalendarBlackoutDatesCollection = function (owner) {
+                this._Owner = owner;
+            };
+            BlackDatesCollection.prototype.AddDatesInPast = function () {
+                this.Add(new Controls.DateRange(DateTime.MinValue, DateTime.Today.AddDays(-1)));
+            };
+            BlackDatesCollection.prototype.ContainsDate = function (date) {
+                for (var i = 0; i < this.Count; i++) {
+                    if (this.GetValueAt(i).IsInRange(date))
+                        return true;
+                }
+                return false;
+            };
+            return BlackDatesCollection;
+        })(Fayde.Collections.ObservableCollection);
+        Controls.BlackDatesCollection = BlackDatesCollection;
+    })(Controls = Fayde.Controls || (Fayde.Controls = {}));
+})(Fayde || (Fayde = {}));
+var Fayde;
+(function (Fayde) {
+    var Controls;
+    (function (Controls) {
+        var DateRange = (function () {
+            function DateRange(Start, End, Description) {
+                if (End === void 0) { End = null; }
+                if (Description === void 0) { Description = null; }
+                this.Start = Start;
+                this.End = End;
+                this.Description = Description;
+            }
+            DateRange.prototype.IsInRange = function (date) {
+                return DateTime.Compare(date, this.Start) >= 0 && (this.End == null || DateTime.Compare(date, this.End) <= 0);
+            };
+            return DateRange;
+        })();
+        Controls.DateRange = DateRange;
+    })(Controls = Fayde.Controls || (Fayde.Controls = {}));
+})(Fayde || (Fayde = {}));
+var Fayde;
+(function (Fayde) {
+    var Controls;
+    (function (Controls) {
+        var Primitives;
+        (function (Primitives) {
+            var CalendarButton = (function (_super) {
+                __extends(CalendarButton, _super);
+                function CalendarButton() {
+                    _super.call(this);
+                    this.DefaultStyleKey = CalendarButton;
+                    this.IsTabStop = false;
+                }
+                Object.defineProperty(CalendarButton.prototype, "IsFocused", {
+                    get: function () {
+                        return this._IsFocused;
+                    },
+                    set: function (val) {
+                        if (val != this._IsFocused) {
+                            this._IsFocused = val;
+                            this.ChangeVisualState(true, "FocusStates");
+                        }
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(CalendarButton.prototype, "IsSelected", {
+                    get: function () {
+                        return this._IsSelected;
+                    },
+                    set: function (val) {
+                        //if (val != this._IsSelected) {
+                        this._IsSelected = val;
+                        this.ChangeVisualState(true, "SelectionStates");
+                        //}
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(CalendarButton.prototype, "IsInactive", {
+                    get: function () {
+                        return this._IsInactive;
+                    },
+                    set: function (val) {
+                        if (val != this._IsSelected) {
+                            this._IsInactive = val;
+                            this.ChangeVisualState(true, "ActiveStates");
+                        }
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                CalendarButton.prototype.ChangeVisualState = function (useTransitions, stateGroup) {
+                    if (stateGroup === void 0) { stateGroup = null; }
+                    if (stateGroup == null || stateGroup == "SelectionStates") {
+                        if (this.IsSelected) {
+                            Fayde.Media.VSM.VisualStateManager.GoToState(this, "Selected", useTransitions);
+                        }
+                        else {
+                            Fayde.Media.VSM.VisualStateManager.GoToState(this, "Unselected", useTransitions);
+                        }
+                    }
+                    if (stateGroup == null || stateGroup == "ActiveStates") {
+                        if (this.IsInactive) {
+                            Fayde.Media.VSM.VisualStateManager.GoToState(this, "Inactive", useTransitions);
+                        }
+                        else {
+                            Fayde.Media.VSM.VisualStateManager.GoToState(this, "Active", useTransitions);
+                        }
+                    }
+                    if (stateGroup == null || stateGroup == "FocusStates") {
+                        if (this.IsFocused && this.IsEnabled) {
+                            Fayde.Media.VSM.VisualStateManager.GoToState(this, "Focused", useTransitions);
+                        }
+                        else {
+                            Fayde.Media.VSM.VisualStateManager.GoToState(this, "Unfocused", useTransitions);
+                        }
+                    }
+                };
+                return CalendarButton;
+            })(Controls.Button);
+            Primitives.CalendarButton = CalendarButton;
+            Controls.TemplateVisualStates(CalendarButton, { Name: "Normal", GroupName: "CommonStates" }, { Name: "Disabled", GroupName: "CommonStates" }, { Name: "MouseOver", GroupName: "CommonStates" }, { Name: "Pressed", GroupName: "CommonStates" }, { Name: "Unfocused", GroupName: "FocusStates" }, { Name: "Focused", GroupName: "FocusStates" }, { Name: "Selected", GroupName: "SelectionStates" }, { Name: "Unselected", GroupName: "SelectionStates" }, { Name: "Active", GroupName: "ActiveStates" }, { Name: "Inactive", GroupName: "ActiveStates" });
+        })(Primitives = Controls.Primitives || (Controls.Primitives = {}));
+    })(Controls = Fayde.Controls || (Fayde.Controls = {}));
+})(Fayde || (Fayde = {}));
+var Fayde;
+(function (Fayde) {
+    var Controls;
+    (function (Controls) {
+        var Primitives;
+        (function (Primitives) {
+            var CalendarDayButton = (function (_super) {
+                __extends(CalendarDayButton, _super);
+                function CalendarDayButton() {
+                    _super.call(this);
+                    this.DefaultStyleKey = CalendarDayButton;
+                }
+                Object.defineProperty(CalendarDayButton.prototype, "IsBlackout", {
+                    get: function () {
+                        return this._IsBlackout;
+                    },
+                    set: function (val) {
+                        if (val != this._IsBlackout) {
+                            this._IsBlackout = val;
+                            this.ChangeVisualState(true, "BlackoutStates");
+                        }
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(CalendarDayButton.prototype, "IsToday", {
+                    get: function () {
+                        return this._IsToday;
+                    },
+                    set: function (val) {
+                        if (val != this._IsToday) {
+                            this._IsToday = val;
+                            this.ChangeVisualState(true, "DayStates");
+                        }
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                CalendarDayButton.prototype.OnApplyTemplate = function () {
+                    _super.prototype.OnApplyTemplate.call(this);
+                    this.ChangeVisualState(false);
+                };
+                CalendarDayButton.prototype.IgnoreMouseOverState = function () {
+                    this._ignoringMouseOverState = false;
+                    if (this.IsMouseOver) {
+                        this._ignoringMouseOverState = true;
+                        this.ChangeVisualState(true);
+                    }
+                };
+                CalendarDayButton.prototype.ChangeVisualState = function (useTransitions, stateGroup) {
+                    if (stateGroup === void 0) { stateGroup = null; }
+                    if (this._ignoringMouseOverState) {
+                        if (this.IsPressed) {
+                            Fayde.Media.VSM.VisualStateManager.GoToState(this, "Pressed", useTransitions);
+                        }
+                        if (this.IsEnabled) {
+                            Fayde.Media.VSM.VisualStateManager.GoToState(this, "Normal", useTransitions);
+                        }
+                        else {
+                            Fayde.Media.VSM.VisualStateManager.GoToState(this, "Disabled", useTransitions);
+                        }
+                    }
+                    if (stateGroup == null || stateGroup == "DayStates") {
+                        if (this.IsToday) {
+                            Fayde.Media.VSM.VisualStateManager.GoToState(this, "Today", useTransitions);
+                        }
+                        else {
+                            Fayde.Media.VSM.VisualStateManager.GoToState(this, "RegularDay", useTransitions);
+                        }
+                    }
+                    if (stateGroup == null || stateGroup == "BlackoutStates") {
+                        if (this.IsBlackout) {
+                            Fayde.Media.VSM.VisualStateManager.GoToState(this, "BlackoutDay", useTransitions);
+                        }
+                        else {
+                            Fayde.Media.VSM.VisualStateManager.GoToState(this, "NormalDay", useTransitions);
+                        }
+                    }
+                    _super.prototype.ChangeVisualState.call(this, useTransitions);
+                };
+                return CalendarDayButton;
+            })(Primitives.CalendarButton);
+            Primitives.CalendarDayButton = CalendarDayButton;
+            Controls.TemplateVisualStates(CalendarDayButton, { Name: "Normal", GroupName: "CommonStates" }, { Name: "Disabled", GroupName: "CommonStates" }, { Name: "MouseOver", GroupName: "CommonStates" }, { Name: "Pressed", GroupName: "CommonStates" }, { Name: "Unfocused", GroupName: "FocusStates" }, { Name: "Focused", GroupName: "FocusStates" }, { Name: "Selected", GroupName: "SelectionStates" }, { Name: "Unselected", GroupName: "SelectionStates" }, { Name: "Active", GroupName: "ActiveStates" }, { Name: "Inactive", GroupName: "ActiveStates" }, { Name: "BlackoutDay", GroupName: "BlackoutDayStates" }, { Name: "NormalDay", GroupName: "BlackoutDayStates" }, { Name: "Today", GroupName: "DayStates" }, { Name: "RegularDay", GroupName: "DayStates" });
+        })(Primitives = Controls.Primitives || (Controls.Primitives = {}));
+    })(Controls = Fayde.Controls || (Fayde.Controls = {}));
+})(Fayde || (Fayde = {}));
+/// <reference path="daterange.ts" />
+/// <reference path="../enums.ts" />
+/// <reference path="../primitives/calendarbutton.ts" />
+/// <reference path="../primitives/calendardaybutton.ts" />
+var Fayde;
+(function (Fayde) {
+    var Controls;
+    (function (Controls) {
+        var Calendar = (function (_super) {
+            __extends(Calendar, _super);
+            //#endregion
+            function Calendar() {
+                _super.call(this);
+                this.SelectedDates = new Fayde.Collections.ObservableCollection();
+                this.BlackoutDates = new Controls.BlackDatesCollection();
+                //#endregion
+                //#region Private Members
+                this._CurrentMonth = DateTime.Today;
+                this.DefaultStyleKey = Calendar;
+                this.KeyDown.on(this._HandleKeyDown, this);
+                this.SelectedDate = new DateTime(2015, 6, 15);
+            }
+            Object.defineProperty(Calendar.prototype, "IsTodayHighlighted", {
+                get: function () {
+                    return this.GetValue(Calendar.IsTodayHighlightedProperty);
+                },
+                set: function (value) {
+                    this.SetValue(Calendar.IsTodayHighlightedProperty, value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Calendar.prototype, "FirstDayOfWeek", {
+                get: function () {
+                    return this.GetValue(Calendar.FirstDayOfWeekProperty);
+                },
+                set: function (value) {
+                    this.SetValue(Calendar.FirstDayOfWeekProperty, value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Calendar.prototype, "DisplayDateStart", {
+                get: function () {
+                    return this.GetValue(Calendar.DisplayDateStartProperty);
+                },
+                set: function (value) {
+                    this.SetValue(Calendar.DisplayDateStartProperty, value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Calendar.prototype, "DisplayDateEnd", {
+                get: function () {
+                    return this.GetValue(Calendar.DisplayDateEndProperty);
+                },
+                set: function (value) {
+                    this.SetValue(Calendar.DisplayDateEndProperty, value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Calendar.prototype, "DisplayDate", {
+                get: function () {
+                    return this.GetValue(Calendar.DisplayDateProperty);
+                },
+                set: function (value) {
+                    this.SetValue(Calendar.DisplayDateProperty, value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Calendar.prototype, "SelectedDate", {
+                get: function () {
+                    return this.GetValue(Calendar.SelectedDateProperty);
+                },
+                set: function (value) {
+                    this.SetValue(Calendar.SelectedDateProperty, value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Calendar.prototype, "DisplayMode", {
+                get: function () {
+                    return this.GetValue(Calendar.DisplayModeProperty);
+                },
+                set: function (value) {
+                    this.SetValue(Calendar.DisplayModeProperty, value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Calendar.prototype, "SelectionMode", {
+                get: function () {
+                    return this.GetValue(Calendar.SelectionModeProperty);
+                },
+                set: function (value) {
+                    this.SetValue(Calendar.SelectionModeProperty, value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Calendar.prototype, "CalendarButtonStyle", {
+                get: function () {
+                    return this.GetValue(Calendar.CalendarButtonStyleProperty);
+                },
+                set: function (value) {
+                    this.SetValue(Calendar.CalendarButtonStyleProperty, value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Calendar.prototype, "CalendarDayButtonStyle", {
+                get: function () {
+                    return this.GetValue(Calendar.CalendarDayButtonStyleProperty);
+                },
+                set: function (value) {
+                    this.SetValue(Calendar.CalendarDayButtonStyleProperty, value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Calendar.prototype, "CalendarStyle", {
+                get: function () {
+                    return this.GetValue(Calendar.CalendarStyleProperty);
+                },
+                set: function (value) {
+                    this.SetValue(Calendar.CalendarStyleProperty, value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Calendar.prototype._OnFirstDayOfWeekChanged = function (oldValue, newValue) {
+            };
+            Calendar.prototype._OnDisplayDateChanged = function (oldValue, newValue) {
+            };
+            Calendar.prototype._OnDisplayDateStartChanged = function (oldValue, newValue) {
+            };
+            Calendar.prototype._OnDisplayDateEndChanged = function (oldValue, newValue) {
+            };
+            Calendar.prototype._OnDisplayModeChanged = function (oldValue, newValue) {
+            };
+            Calendar.prototype._OnSelectiondModeChanged = function (oldValue, newValue) {
+            };
+            Calendar.prototype._OnSelectedDateChanged = function (oldValue, newValue) {
+            };
+            Object.defineProperty(Calendar.prototype, "FocusButton", {
+                get: function () {
+                    return this._FocusButton;
+                },
+                set: function (val) {
+                    if (this._FocusButton != null && this._FocusButton != val) {
+                        this._FocusButton.IsFocused = false;
+                        this._FocusButton.IsSelected = false;
+                    }
+                    this._FocusButton = val;
+                    val.IsFocused = true;
+                    val.IsSelected = true;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Calendar.prototype, "HasFocus", {
+                get: function () {
+                    return this.FocusButton != null;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Calendar.prototype.OnApplyTemplate = function () {
+                _super.prototype.OnApplyTemplate.call(this);
+                this.HeaderButton = this.GetTemplateChild("HeaderButton");
+                if (this.HeaderButton != null) {
+                    this.HeaderButton.Click.on(this._HandleHeaderButtonClick, this);
+                    this.HeaderButton.IsTabStop = false;
+                }
+                this.PreviousButton = this.GetTemplateChild("PreviousButton");
+                if (this.PreviousButton != null) {
+                    this.PreviousButton.Click.on(this._HandlePreviousButtonClick, this);
+                    this.PreviousButton.IsTabStop = false;
+                    this.PreviousButton.Visibility = Fayde.Visibility.Visible;
+                }
+                this.NextButton = this.GetTemplateChild("NextButton");
+                if (this.NextButton != null) {
+                    this.NextButton.Click.on(this._HandleNextButtonClick, this);
+                    this.NextButton.IsTabStop = false;
+                    this.NextButton.Visibility = Fayde.Visibility.Visible;
+                }
+                this.MonthView = this.GetTemplateChild("MonthView");
+                this.YearView = this.GetTemplateChild("YearView");
+                this._DayTitleTemplate = this.GetTemplateChild("DayTitleTemplate");
+                this._DisabledVisual = this.GetTemplateChild("DisabledVisual");
+                this.UpdateDisabledGrid(this.IsEnabled);
+                this.PopulateGrids();
+                this.ChangeVisualState();
+                this.Focus();
+            };
+            Object.defineProperty(Calendar.prototype, "CurrentMonth", {
+                get: function () {
+                    return this._CurrentMonth;
+                },
+                set: function (val) {
+                    this._CurrentMonth = val;
+                    this.ChangeVisualState();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Calendar.prototype.SetButtonState = function (childButton, dateToAdd) {
+                if (dateToAdd < this.DisplayDateStart || dateToAdd > this.DisplayDateEnd) {
+                    childButton.IsEnabled = false;
+                }
+                else {
+                    if (this.BlackoutDates.ContainsDate(dateToAdd)) {
+                        childButton.IsBlackout = true;
+                    }
+                    else {
+                        childButton.IsBlackout = false;
+                    }
+                    childButton.IsEnabled = true;
+                    childButton.IsInactive = dateToAdd.Month != this._CurrentMonth.Month;
+                    childButton.IsToday = this.IsTodayHighlighted && DateTime.Compare(dateToAdd.Date, DateTime.Today) == 0;
+                    for (var i = 0; i < this.SelectedDates.Count; i++) {
+                        var time = this.SelectedDates.GetValueAt(i);
+                        childButton.IsSelected = DateTime.Compare(dateToAdd, time.Date) == 0;
+                    }
+                    if (this.SelectedDate != null && this.SelectedDate.Month == this._CurrentMonth.Month) {
+                        if (DateTime.Compare(this.SelectedDate, dateToAdd) == 0) {
+                            if (this.FocusButton != null) {
+                                this.FocusButton.IsFocused = false;
+                            }
+                            this.FocusButton = childButton;
+                        }
+                        else {
+                            childButton.IsFocused = false;
+                        }
+                    }
+                    else if (DateTime.Compare(dateToAdd, this._CurrentMonth) == 0)
+                        childButton.IsFocused = true;
+                }
+            };
+            Calendar.prototype.SetDayButtons = function () {
+                var day;
+                var firstDayOfMonth = new DateTime(this.CurrentMonth.Year, this.CurrentMonth.Month, 1);
+                var num = this.PreviousMonthDays(firstDayOfMonth);
+                if (firstDayOfMonth != DateTime.MinValue) {
+                    day = firstDayOfMonth.AddDays(-num);
+                }
+                else {
+                    day = firstDayOfMonth;
+                }
+                var num2 = 0x31;
+                for (var i = 7; i < num2; i++) {
+                    var childButton = this.MonthView.Children.GetValueAt(i);
+                    this.SetButtonState(childButton, day);
+                    childButton.Content = day.Day;
+                    childButton.DataContext = day;
+                    if (day.Day < DateTime.MaxValue) {
+                        day = day.AddDays(1);
+                    }
+                    else {
+                        i++;
+                        for (var j = i; j < num2; j++) {
+                            childButton = this.MonthView.Children.GetValueAt(j);
+                            childButton.Content = j;
+                            childButton.IsEnabled = false;
+                        }
+                        return;
+                    }
+                }
+            };
+            Calendar.prototype.SetDayTitles = function () {
+                for (var i = 0; i < 7; i++) {
+                    var element = this.MonthView.Children.GetValueAt(i);
+                    if (element != null) {
+                        element.DataContext = Fayde.Localization.DateTimeFormatInfo.Instance.ShortestDayNames[(i + this.FirstDayOfWeek) % (DayOfWeek.Saturday | DayOfWeek.Monday)];
+                    }
+                }
+            };
+            Calendar.prototype.SetDecadeModeHeaderButton = function (decade, decadeEnd) {
+                if (this.HeaderButton != null) {
+                    this.HeaderButton.Content = decade + "-" + decadeEnd;
+                    this.HeaderButton.IsEnabled = false;
+                }
+            };
+            Calendar.prototype.SetDecadeModeNextButton = function (decadeEnd) {
+                if (this.NextButton != null) {
+                    this.NextButton.IsEnabled = this.DisplayDateEnd.Year > decadeEnd;
+                }
+            };
+            Calendar.prototype.SetDecadeModePreviousButton = function (decade) {
+                if (this.PreviousButton != null) {
+                    this.PreviousButton.IsEnabled = decade > this.DisplayDateStart.Year;
+                }
+            };
+            Calendar.prototype.SetMonthButtons = function () {
+                for (var i = 0; i < this.YearView.Children.Count; i++) {
+                    var button = this.YearView.Children.GetValueAt(i);
+                    var time = new DateTime(this._CurrentMonth.Year, i + 1, 1);
+                    button.DataContext = time;
+                    button.Content = Fayde.Localization.DateTimeFormatInfo.Instance.AbbreviatedMonthNames[i];
+                    button.Visibility = Fayde.Visibility.Visible;
+                    button.IsInactive = false;
+                    if (DateTime.Compare(time, this.DisplayDateStart.Date) < 0 || DateTime.Compare(time, this.DisplayDateEnd.Date) > 0) {
+                        button.IsEnabled = false;
+                    }
+                    else {
+                        button.IsEnabled = true;
+                    }
+                    if (time.Year == this._CurrentMonth.Year && time.Month == this._CurrentMonth.Month) {
+                        button.IsFocused = true;
+                    }
+                    else {
+                        button.IsFocused = false;
+                    }
+                    if (time.Year == this.SelectedDate.Year && time.Month == this.SelectedDate.Month) {
+                        button.IsSelected = true;
+                    }
+                    else {
+                        button.IsSelected = false;
+                    }
+                }
+            };
+            Calendar.prototype.SetMonthModeHeaderButton = function () {
+                if (this.HeaderButton != null) {
+                    this.HeaderButton.Content = this._CurrentMonth.toString("MMMM yyyy");
+                    this.HeaderButton.IsEnabled = true;
+                }
+            };
+            Calendar.prototype.SetMonthModeNextButton = function () {
+                if (this.NextButton != null) {
+                    this.NextButton.IsEnabled = DateTime.Compare(this.DisplayDateEnd, this.CurrentMonth.AddMonths(1)) > 0;
+                }
+            };
+            Calendar.prototype.SetMonthModePreviousButton = function () {
+                if (this.PreviousButton != null) {
+                    this.PreviousButton.IsEnabled = DateTime.Compare(this.DisplayDateStart, this.CurrentMonth.AddMonths(-1)) < 0;
+                }
+            };
+            Calendar.prototype.SetYearButtons = function (decade, decadeEnd) {
+                var num2 = -1;
+                for (var i = 0; i < this.YearView.Children.Count; i++) {
+                    var button = this.YearView.Children.GetValueAt(i);
+                    var num = decade + num2;
+                    if ((num <= DateTime.MaxValue.Year) && (num >= DateTime.MinValue.Year)) {
+                        var time = new DateTime(num, 1, 1);
+                        button.DataContext = time;
+                        button.Content = time.toString('yyyy');
+                        if (num == this.CurrentMonth.Year) {
+                            button.IsFocused = true;
+                        }
+                        else {
+                            button.IsFocused = false;
+                        }
+                        if (num == this.SelectedDate.Year) {
+                            button.IsSelected = true;
+                        }
+                        else {
+                            button.IsSelected = false;
+                        }
+                        if ((num < this.DisplayDateStart.Year) || (num > this.DisplayDateEnd.Year)) {
+                            button.IsEnabled = false;
+                        }
+                        else {
+                            button.IsEnabled = true;
+                        }
+                        button.IsInactive = (num < decade) || (num > decadeEnd);
+                    }
+                    else {
+                        button.IsEnabled = false;
+                    }
+                    num2++;
+                }
+            };
+            Calendar.prototype.SetYearModeHeaderButton = function () {
+                if (this.HeaderButton != null) {
+                    this.HeaderButton.IsEnabled = true;
+                    this.HeaderButton.Content = this._CurrentMonth.Year.toString();
+                }
+            };
+            Calendar.prototype.SetYearModeNextButton = function () {
+                if (this.NextButton != null) {
+                    this.NextButton.IsEnabled = this.DisplayDateEnd.Year > this._CurrentMonth.Year;
+                }
+            };
+            Calendar.prototype.SetYearModePreviousButton = function () {
+                if (this.PreviousButton != null) {
+                    this.PreviousButton.IsEnabled = this.DisplayDateStart.Year < this._CurrentMonth.Year;
+                }
+            };
+            Calendar.prototype.PopulateGrids = function () {
+                if (this.MonthView != null) {
+                    for (var i = 0; i < 7; i++) {
+                        if (this._DayTitleTemplate != null) {
+                            var element = new Controls.ContentControl();
+                            element.SetValue(Controls.Button.TemplateProperty, this._DayTitleTemplate);
+                            element.SetValue(Controls.Grid.RowProperty, 0);
+                            element.SetValue(Controls.Grid.ColumnProperty, i);
+                            this.MonthView.Children.Add(element);
+                        }
+                    }
+                    for (var j = 1; j < 7; j++) {
+                        for (var k = 0; k < 7; k++) {
+                            var button = new Controls.Primitives.CalendarDayButton();
+                            if (this.CalendarDayButtonStyle != null) {
+                                button.Style = this.CalendarDayButtonStyle;
+                            }
+                            button.SetValue(Controls.Grid.RowProperty, j);
+                            button.SetValue(Controls.Grid.ColumnProperty, k);
+                            button.Click.on(this._HandleCellClick, this);
+                            this.MonthView.Children.Add(button);
+                        }
+                    }
+                }
+                if (this.YearView != null) {
+                    var num4 = 0;
+                    for (var m = 0; m < 3; m++) {
+                        for (var n = 0; n < 4; n++) {
+                            var button2 = new Fayde.Controls.Primitives.CalendarButton();
+                            if (this.CalendarButtonStyle != null) {
+                                button.Style = this.CalendarButtonStyle;
+                            }
+                            button2.SetValue(Controls.Grid.RowProperty, m);
+                            button2.SetValue(Controls.Grid.ColumnProperty, n);
+                            button2.Click.on(this._HandleCellClick, this);
+                            this.YearView.Children.Add(button2);
+                            num4++;
+                        }
+                    }
+                }
+            };
+            Calendar.prototype.UpdateDisabledGrid = function (isEnabled) {
+                if (isEnabled) {
+                    if (this._DisabledVisual != null) {
+                        this._DisabledVisual.Visibility = Fayde.Visibility.Collapsed;
+                    }
+                    Fayde.Media.VSM.VisualStateManager.GoToState(this, "Normal", true);
+                }
+                else {
+                    if (this._DisabledVisual != null) {
+                        this._DisabledVisual.Visibility = Fayde.Visibility.Visible;
+                    }
+                    Fayde.Media.VSM.VisualStateManager.GoToState(this, "Normal", true);
+                    Fayde.Media.VSM.VisualStateManager.GoToState(this, "Disabled", true);
+                }
+            };
+            Calendar.prototype.UpdateMonthMode = function () {
+                this.SetMonthModeHeaderButton();
+                this.SetMonthModePreviousButton();
+                this.SetMonthModeNextButton();
+                if (this.MonthView != null) {
+                    this.SetDayTitles();
+                    this.SetDayButtons();
+                }
+            };
+            Calendar.prototype.UpdateYearMode = function () {
+                this.SetYearModeHeaderButton();
+                this.SetYearModePreviousButton();
+                this.SetYearModeNextButton();
+                if (this.YearView != null) {
+                    this.SetMonthButtons();
+                }
+            };
+            Calendar.prototype.GetDecadeBegin = function (date) {
+                return new DateTime(Math.floor(date.Year / 10) * 10, 1, 1);
+            };
+            Calendar.prototype.UpdateDecadeMode = function () {
+                var decade = this.GetDecadeBegin(this._CurrentMonth).Year;
+                var decadeEnd = decade + 9;
+                this.SetDecadeModeHeaderButton(decade, decadeEnd);
+                this.SetDecadeModePreviousButton(decade);
+                this.SetDecadeModeNextButton(decadeEnd);
+                if (this.YearView != null) {
+                    this.SetYearButtons(decade, decadeEnd);
+                }
+            };
+            Calendar.prototype.PreviousMonthDays = function (firstOfMonth) {
+                var num = (((firstOfMonth.DayOfWeek - this.FirstDayOfWeek) + ((DayOfWeek.Saturday) | (DayOfWeek.Monday))) % (((DayOfWeek.Saturday | DayOfWeek.Monday))));
+                if (num == 0) {
+                    return 7;
+                }
+                return num;
+            };
+            Calendar.prototype._HandleCellClick = function (sender, e) {
+                var button = sender;
+                if (this.DisplayMode == Controls.CalendarMode.Month) {
+                    this.SelectedDate = button.DataContext;
+                    this._CurrentMonth = button.DataContext;
+                    this.FocusButton = button;
+                }
+                else if (this.DisplayMode == Controls.CalendarMode.Year) {
+                    this._CurrentMonth = button.DataContext;
+                    this.SwitchCalendarMode(Controls.CalendarMode.Month);
+                }
+                else if (this.DisplayMode == Controls.CalendarMode.Decade) {
+                    this._CurrentMonth = button.DataContext;
+                    this.SwitchCalendarMode(Controls.CalendarMode.Year);
+                }
+            };
+            Calendar.prototype._HandlePreviousButtonClick = function (sender, e) {
+                if (this.DisplayMode == Controls.CalendarMode.Month)
+                    this.CurrentMonth = this._CurrentMonth.AddMonths(-1);
+                if (this.DisplayMode == Controls.CalendarMode.Year)
+                    this.CurrentMonth = this._CurrentMonth.AddYears(-1);
+                if (this.DisplayMode == Controls.CalendarMode.Decade)
+                    this.CurrentMonth = this._CurrentMonth.AddYears(-10);
+            };
+            Calendar.prototype._HandleNextButtonClick = function (sender, e) {
+                if (this.DisplayMode == Controls.CalendarMode.Month)
+                    this.CurrentMonth = this._CurrentMonth.AddMonths(1);
+                if (this.DisplayMode == Controls.CalendarMode.Year)
+                    this.CurrentMonth = this._CurrentMonth.AddYears(1);
+                if (this.DisplayMode == Controls.CalendarMode.Decade)
+                    this.CurrentMonth = this._CurrentMonth.AddYears(10);
+            };
+            Calendar.prototype.SwitchCalendarMode = function (newMode) {
+                var oldMode = this.DisplayMode;
+                this.DisplayMode = newMode;
+                if (oldMode == Controls.CalendarMode.Month && newMode == Controls.CalendarMode.Year) {
+                    this.CurrentMonth = new DateTime(this.CurrentMonth.Year, this.CurrentMonth.Month, 1);
+                }
+                if (oldMode == Controls.CalendarMode.Year && newMode == Controls.CalendarMode.Month) {
+                    this.CurrentMonth = new DateTime(this._CurrentMonth.Year, this._CurrentMonth.Month, 1);
+                }
+                if (oldMode == Controls.CalendarMode.Year && newMode == Controls.CalendarMode.Decade) {
+                    this.CurrentMonth = this.GetDecadeBegin(this.SelectedDate);
+                }
+                if (oldMode == Controls.CalendarMode.Decade && newMode == Controls.CalendarMode.Year) {
+                    this.CurrentMonth = new DateTime(this.CurrentMonth.Year, this.CurrentMonth.Month, 1);
+                }
+            };
+            Calendar.prototype._HandleHeaderButtonClick = function (sender, e) {
+                if (!this.HasFocus) {
+                    this.Focus();
+                }
+                var button = sender;
+                if (button.IsEnabled) {
+                    if (this.DisplayMode == Controls.CalendarMode.Month) {
+                        this.SwitchCalendarMode(Controls.CalendarMode.Year);
+                    }
+                    else {
+                        this.SwitchCalendarMode(Controls.CalendarMode.Decade);
+                    }
+                }
+            };
+            Calendar.prototype._HandleKeyDown = function (sender, e) {
+                if (!e.Handled && sender.IsEnabled) {
+                    e.Handled = this.ProcessKey(e);
+                }
+            };
+            Calendar.prototype.ChangeVisualState = function () {
+                if (this.DisplayMode == Fayde.Controls.CalendarMode.Month) {
+                    this.UpdateMonthMode();
+                    this.MonthView.Visibility = Fayde.Visibility.Visible;
+                    this.YearView.Visibility = Fayde.Visibility.Collapsed;
+                }
+                else {
+                    this.YearView.Visibility = Fayde.Visibility.Visible;
+                    this.MonthView.Visibility = Fayde.Visibility.Collapsed;
+                    if (this.DisplayMode == Controls.CalendarMode.Year) {
+                        this.UpdateYearMode();
+                    }
+                    else if (this.DisplayMode == Controls.CalendarMode.Decade) {
+                        this.UpdateDecadeMode();
+                    }
+                }
+            };
+            Calendar.prototype.ProcessKey = function (e) {
+                var logicalKey = Fayde.Input.InteractionHelper.GetLogicalKey(this.FlowDirection, e.Key);
+                var colsPerRow = this.DisplayMode == Controls.CalendarMode.Month ? 7 : 4;
+                switch (logicalKey) {
+                    case Fayde.Input.Key.Enter:
+                    case Fayde.Input.Key.Space:
+                        if (this.DisplayMode == Controls.CalendarMode.Year) {
+                            this.SwitchCalendarMode(Controls.CalendarMode.Month);
+                        }
+                        else if (this.DisplayMode == Controls.CalendarMode.Decade) {
+                            this.SwitchCalendarMode(Controls.CalendarMode.Year);
+                        }
+                        break;
+                    case Fayde.Input.Key.PageUp:
+                        this.GoToCell(-colsPerRow);
+                        break;
+                    case Fayde.Input.Key.PageDown:
+                        this.GoToCell(colsPerRow);
+                        break;
+                    case Fayde.Input.Key.End:
+                        this.GoToCell(31);
+                        break;
+                    case Fayde.Input.Key.Home:
+                        this.GoToCell(0);
+                        return true;
+                    case Fayde.Input.Key.Left:
+                        this.GoToCell(-1);
+                        break;
+                    case Fayde.Input.Key.Right:
+                        this.GoToCell(1);
+                        break;
+                    case Fayde.Input.Key.Up:
+                        this.GoToCell(-colsPerRow);
+                        break;
+                    case Fayde.Input.Key.Down:
+                        this.GoToCell(colsPerRow);
+                        break;
+                    default:
+                        return false;
+                }
+                return true;
+            };
+            Calendar.prototype.GoToCell = function (delta) {
+                switch (this.DisplayMode) {
+                    case Controls.CalendarMode.Month:
+                        this.SelectedDate = this.SelectedDate.AddDays(delta);
+                        this.CurrentMonth = new DateTime(this.SelectedDate.Year, this.SelectedDate.Month, 1);
+                        break;
+                    case Controls.CalendarMode.Year:
+                        this.CurrentMonth = this.CurrentMonth.AddMonths(delta);
+                        break;
+                    case Controls.CalendarMode.Decade:
+                        this.CurrentMonth = this.CurrentMonth.AddYears(delta);
+                        break;
+                }
+            };
+            Calendar.FirstDayOfWeekProperty = DependencyProperty.Register("FirstDayOfWeek", function () { return DayOfWeek; }, Calendar, Fayde.Localization.DateTimeFormatInfo.Instance.FirstDayOfWeek, function (d, args) { return d._OnFirstDayOfWeekChanged; });
+            Calendar.DisplayDateProperty = DependencyProperty.Register("DisplayDate", function () { return DateTime; }, Calendar, DateTime.MinValue, function (d, args) { return d._OnDisplayDateChanged; });
+            Calendar.DisplayDateStartProperty = DependencyProperty.Register("DisplayDateStart", function () { return DateTime; }, Calendar, DateTime.MinValue, function (d, args) { return d._OnDisplayDateStartChanged; });
+            Calendar.DisplayDateEndProperty = DependencyProperty.Register("DisplayDateEnd", function () { return DateTime; }, Calendar, DateTime.MaxValue, function (d, args) { return d._OnDisplayDateEndChanged; });
+            Calendar.IsTodayHighlightedProperty = DependencyProperty.Register("IsTodayHighlighted", function () { return Boolean; }, Calendar, true);
+            Calendar.SelectedDateProperty = DependencyProperty.Register("SelectedDate", function () { return DateTime; }, Calendar, DateTime.Today, function (d, args) { return d._OnSelectedDateChanged; });
+            Calendar.DisplayModeProperty = DependencyProperty.Register("DisplayMode", function () { return Controls.CalendarMode; }, Calendar, Controls.CalendarMode.Month, function (d, args) { return d._OnDisplayModeChanged; });
+            Calendar.SelectionModeProperty = DependencyProperty.Register("SelectionMode", function () { return Controls.CalendarSelectionMode; }, Calendar, Controls.CalendarSelectionMode.SingleDate, function (d, args) { return d._OnSelectiondModeChanged; });
+            Calendar.CalendarButtonStyleProperty = DependencyProperty.Register("CalendarButtonStyle", function () { return Fayde.Style; }, Calendar, null);
+            Calendar.CalendarDayButtonStyleProperty = DependencyProperty.Register("CalendarDayButtonStyle", function () { return Fayde.Style; }, Calendar, null);
+            Calendar.CalendarStyleProperty = DependencyProperty.Register("CalendarStyle", function () { return Fayde.Style; }, Calendar, null);
+            return Calendar;
+        })(Controls.Control);
+        Controls.Calendar = Calendar;
+        Controls.TemplateParts(Calendar, { Name: "Root", Type: Fayde.FrameworkElement }, { Name: "YearView", Type: Controls.Grid }, { Name: "MonthView", Type: Controls.Grid }, { Name: "HeaderButton", Type: Controls.Button }, { Name: "PreviousButton", Type: Controls.Button }, { Name: "NextButton", Type: Controls.Button }, { Name: "DayTitleTemplate", Type: Fayde.DataTemplate }, { Name: "DisabledVisual", Type: Fayde.FrameworkElement });
+        Controls.TemplateVisualStates(Calendar, { Name: "Normal", GroupName: "CommonStates" }, { Name: "Disabled", GroupName: "CommonStates" });
+    })(Controls = Fayde.Controls || (Fayde.Controls = {}));
+})(Fayde || (Fayde = {}));
+var Fayde;
+(function (Fayde) {
+    var Controls;
+    (function (Controls) {
+        var CalendarDateChangedEventArgs = (function (_super) {
+            __extends(CalendarDateChangedEventArgs, _super);
+            function CalendarDateChangedEventArgs(RemoveData, AddedDate) {
+                _super.call(this);
+                this.RemoveData = RemoveData;
+                this.AddedDate = AddedDate;
+            }
+            return CalendarDateChangedEventArgs;
+        })(Fayde.RoutedEventArgs);
+        Controls.CalendarDateChangedEventArgs = CalendarDateChangedEventArgs;
     })(Controls = Fayde.Controls || (Fayde.Controls = {}));
 })(Fayde || (Fayde = {}));
 var Fayde;

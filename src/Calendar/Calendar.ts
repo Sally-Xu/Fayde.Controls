@@ -142,9 +142,7 @@ module Fayde.Controls {
             val.IsFocused = true;
             val.IsSelected = true;
         }
-       
-      
-               
+            
         get HasFocus(): boolean {
             return this.FocusButton != null;
         }
@@ -162,6 +160,7 @@ module Fayde.Controls {
             super();
             this.DefaultStyleKey = Calendar;
             this.KeyDown.on(this._HandleKeyDown, this);    
+            this.SelectedDate = new DateTime(2015, 6, 15);
         }
 
         OnApplyTemplate() {

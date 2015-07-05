@@ -32,14 +32,17 @@ declare module Fayde.Controls {
         OnKeyDown(e: Input.KeyEventArgs): void;
         OnMouseLeftButtonDown(e: Input.MouseButtonEventArgs): void;
         OnMouseRightButtonDown(e: Input.MouseButtonEventArgs): void;
+        OnTouchDown(e: Fayde.Input.TouchEventArgs): void;
         private _Owner;
         Owner: DependencyObject;
         private _PopupAlignmentPoint;
         private _SettingIsOpen;
         private _Popup;
         private _Overlay;
+        private _HandleOwnerTouchDown(sender, e);
         private _HandleOwnerMouseRightButtonDown(sender, e);
         private _HandleOverlayMouseButtonDown(sender, e);
+        private _HandleOverlayTouchDown(sender, e);
         private _HandleContextMenuSizeChanged(sender, e);
         ChildMenuItemClicked(): void;
         private UpdateContextMenuPlacement();
@@ -130,6 +133,17 @@ declare module Fayde.Controls {
         UpOnly = 0,
         DownOnly = 1,
         Both = 2,
+    }
+    enum CalendarMode {
+        Month = 1,
+        Year = 2,
+        Decade = 3,
+    }
+    enum CalendarSelectionMode {
+        SingleDate = 1,
+        SingleRange = 2,
+        MultipleRange = 3,
+        None = 4,
     }
 }
 declare module Fayde.Controls {
@@ -658,6 +672,134 @@ declare module Fayde.Controls {
         Value: T;
         Handled: boolean;
         constructor(text: string);
+    }
+}
+declare module Fayde.Controls {
+    class BlackDatesCollection extends Fayde.Collections.ObservableCollection<DateRange> {
+        private _Owner;
+        CalendarBlackoutDatesCollection(owner: Calendar): void;
+        AddDatesInPast(): void;
+        ContainsDate(date: DateTime): boolean;
+    }
+}
+declare module Fayde.Controls {
+    class DateRange {
+        Start: DateTime;
+        End: DateTime;
+        Description: string;
+        constructor(Start: DateTime, End?: DateTime, Description?: string);
+        IsInRange(date: DateTime): boolean;
+    }
+}
+declare module Fayde.Controls.Primitives {
+    class CalendarButton extends Button {
+        private _IsFocused;
+        IsFocused: boolean;
+        private _IsSelected;
+        IsSelected: boolean;
+        private _IsInactive;
+        IsInactive: boolean;
+        constructor();
+        protected ChangeVisualState(useTransitions: boolean, stateGroup?: string): void;
+    }
+}
+declare module Fayde.Controls.Primitives {
+    class CalendarDayButton extends CalendarButton {
+        private _IsBlackout;
+        IsBlackout: boolean;
+        private _IsToday;
+        IsToday: boolean;
+        private _ignoringMouseOverState;
+        constructor();
+        OnApplyTemplate(): void;
+        IgnoreMouseOverState(): void;
+        protected ChangeVisualState(useTransitions: boolean, stateGroup?: string): void;
+    }
+}
+declare module Fayde.Controls {
+    class Calendar extends Control {
+        static FirstDayOfWeekProperty: DependencyProperty;
+        static DisplayDateProperty: DependencyProperty;
+        static DisplayDateStartProperty: DependencyProperty;
+        static DisplayDateEndProperty: DependencyProperty;
+        static IsTodayHighlightedProperty: DependencyProperty;
+        static SelectedDateProperty: DependencyProperty;
+        static DisplayModeProperty: DependencyProperty;
+        static SelectionModeProperty: DependencyProperty;
+        static CalendarButtonStyleProperty: DependencyProperty;
+        static CalendarDayButtonStyleProperty: DependencyProperty;
+        static CalendarStyleProperty: DependencyProperty;
+        IsTodayHighlighted: boolean;
+        FirstDayOfWeek: DayOfWeek;
+        DisplayDateStart: DateTime;
+        DisplayDateEnd: DateTime;
+        DisplayDate: DateTime;
+        SelectedDate: DateTime;
+        DisplayMode: CalendarMode;
+        SelectionMode: CalendarSelectionMode;
+        CalendarButtonStyle: Style;
+        CalendarDayButtonStyle: Style;
+        CalendarStyle: Style;
+        SelectedDates: Fayde.Collections.ObservableCollection<DateTime>;
+        BlackoutDates: BlackDatesCollection;
+        private _OnFirstDayOfWeekChanged(oldValue, newValue);
+        private _OnDisplayDateChanged(oldValue, newValue);
+        private _OnDisplayDateStartChanged(oldValue, newValue);
+        private _OnDisplayDateEndChanged(oldValue, newValue);
+        private _OnDisplayModeChanged(oldValue, newValue);
+        private _OnSelectiondModeChanged(oldValue, newValue);
+        private _OnSelectedDateChanged(oldValue, newValue);
+        MonthView: Grid;
+        YearView: Grid;
+        HeaderButton: Button;
+        PreviousButton: Button;
+        NextButton: Button;
+        private _FocusButton;
+        FocusButton: Primitives.CalendarDayButton;
+        HasFocus: boolean;
+        private _CurrentMonth;
+        private _DayTitleTemplate;
+        private _DisabledVisual;
+        constructor();
+        OnApplyTemplate(): void;
+        CurrentMonth: DateTime;
+        private SetButtonState(childButton, dateToAdd);
+        private SetDayButtons();
+        private SetDayTitles();
+        private SetDecadeModeHeaderButton(decade, decadeEnd);
+        private SetDecadeModeNextButton(decadeEnd);
+        private SetDecadeModePreviousButton(decade);
+        private SetMonthButtons();
+        private SetMonthModeHeaderButton();
+        private SetMonthModeNextButton();
+        private SetMonthModePreviousButton();
+        private SetYearButtons(decade, decadeEnd);
+        private SetYearModeHeaderButton();
+        private SetYearModeNextButton();
+        private SetYearModePreviousButton();
+        private PopulateGrids();
+        UpdateDisabledGrid(isEnabled: boolean): void;
+        private UpdateMonthMode();
+        private UpdateYearMode();
+        private GetDecadeBegin(date);
+        private UpdateDecadeMode();
+        private PreviousMonthDays(firstOfMonth);
+        private _HandleCellClick(sender, e);
+        private _HandlePreviousButtonClick(sender, e);
+        private _HandleNextButtonClick(sender, e);
+        private SwitchCalendarMode(newMode);
+        private _HandleHeaderButtonClick(sender, e);
+        private _HandleKeyDown(sender, e);
+        private ChangeVisualState();
+        private ProcessKey(e);
+        private GoToCell(delta);
+    }
+}
+declare module Fayde.Controls {
+    class CalendarDateChangedEventArgs extends RoutedEventArgs {
+        RemoveData: DateTime;
+        AddedDate: DateTime;
+        constructor(RemoveData?: DateTime, AddedDate?: DateTime);
     }
 }
 declare module Fayde.Controls.contextmenu {

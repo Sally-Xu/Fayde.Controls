@@ -1,39 +1,6 @@
 ﻿module Fayde.Controls.Primitives {
 
-    export class CalendarDayButton extends Button {
-        private _IsFocused: boolean;
-        get IsFocused(): boolean {
-            return this._IsFocused;
-        }
-        set IsFocused(val: boolean) {
-            if (val != this._IsFocused) {
-                this._IsFocused = val;
-                this.ChangeVisualState(true, "FocusStates");
-            }
-        }
-
-        private _IsSelected: boolean;
-        get IsSelected(): boolean {
-            return this._IsSelected;
-        }
-        set IsSelected(val: boolean) {
-            if (val != this._IsSelected) {
-                this._IsSelected = val;
-                this.ChangeVisualState(true, "SelectionStates");
-            }
-        }
-
-        private _IsInactive: boolean;
-        get IsInactive(): boolean {
-            return this._IsInactive;
-        }
-        set IsInactive(val: boolean) {
-            if (val != this._IsSelected) {
-                this._IsInactive = val;
-                this.ChangeVisualState(true, "ActiveStates");
-            }
-        }
-
+    export class CalendarDayButton extends CalendarButton {
         private _IsBlackout: boolean;
         get IsBlackout(): boolean {
             return this._IsBlackout;
@@ -61,7 +28,6 @@
         constructor() {
             super();
             this.DefaultStyleKey = CalendarDayButton;
-            this.IsTabStop = false;
         }
         
         OnApplyTemplate() {
@@ -89,31 +55,6 @@
                     Media.VSM.VisualStateManager.GoToState(this, "Disabled", useTransitions);
                 }
             }
-            if (stateGroup == null || stateGroup == "SelectionStates") {
-                if (this.IsSelected) {
-                    Media.VSM.VisualStateManager.GoToState(this, "Selected", useTransitions);
-                }
-                else {
-                    Media.VSM.VisualStateManager.GoToState(this, "Unselected", useTransitions);
-                }
-            }
-            if (stateGroup == null || stateGroup == "ActiveStates") {
-                if (this.IsInactive) {
-                    Media.VSM.VisualStateManager.GoToState(this, "Inactive", useTransitions);
-                }
-                else {
-                    Media.VSM.VisualStateManager.GoToState(this, "Active", useTransitions);
-                }
-            }
-            if (stateGroup == null || stateGroup == "FocusStates") {
-                if (this.IsFocused && this.IsEnabled) {
-                    Media.VSM.VisualStateManager.GoToState(this, "Focused", useTransitions);
-                }
-                else {
-                    Media.VSM.VisualStateManager.GoToState(this, "Unfocused", useTransitions);
-                }
-            }
-
             if (stateGroup == null || stateGroup == "DayStates") {
                 if (this.IsToday) {
                     Media.VSM.VisualStateManager.GoToState(this, "Today", useTransitions);
@@ -131,7 +72,7 @@
                     Media.VSM.VisualStateManager.GoToState(this, "NormalDay", useTransitions);
                 }
             }
-            //super.ChangeVisualState(useTransitions);         
+            super.ChangeVisualState(useTransitions);         
         }     
     }
     TemplateVisualStates(CalendarDayButton,

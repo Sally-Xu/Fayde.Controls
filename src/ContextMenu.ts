@@ -65,6 +65,14 @@ module Fayde.Controls {
             super.OnMouseRightButtonDown(e);
         }
 
+        //#region Touch Event
+        OnTouchDown(e: Fayde.Input.TouchEventArgs) {           
+            super.OnTouchDown(e);    
+            e.Handled = true;  
+            this.ChildMenuItemClicked();               
+        }
+                             
+        //#endregion
         private _Owner: DependencyObject = null;
         get Owner (): DependencyObject {
             return this._Owner;
@@ -73,15 +81,19 @@ module Fayde.Controls {
         set Owner (value: DependencyObject) {
             if (this._Owner) {
                 var fe = this._Owner instanceof FrameworkElement ? <FrameworkElement>this._Owner : null;
-                if (fe)
+                if (fe) {
                     fe.MouseRightButtonDown.off(this._HandleOwnerMouseRightButtonDown, this);
+                    fe.TouchDown.off(this._HandleOwnerTouchDown, this);
+                }
             }
             this._Owner = value;
             if (!this._Owner)
                 return;
             fe = this._Owner instanceof FrameworkElement ? <FrameworkElement>this._Owner : null;
-            if (fe)
+            if (fe) {
                 fe.MouseRightButtonDown.on(this._HandleOwnerMouseRightButtonDown, this);
+                fe.TouchEnter.on(this._HandleOwnerTouchDown, this);              
+            }
         }
 
         private _PopupAlignmentPoint = new Point();
@@ -89,14 +101,28 @@ module Fayde.Controls {
         private _Popup: Controls.Primitives.Popup = null;
         private _Overlay: Panel = null;
 
+        private _HandleOwnerTouchDown(sender: any, e: Fayde.Input.TouchEventArgs) {         
+            this.OpenPopup(e.GetTouchPoint(null).Position);
+            e.Handled = true;
+        }
+        
         private _HandleOwnerMouseRightButtonDown (sender: any, e: Fayde.Input.MouseButtonEventArgs) {
             this.OpenPopup(e.GetPosition(null));
             e.Handled = true;
         }
 
-        private _HandleOverlayMouseButtonDown (sender: any, e: Fayde.Input.MouseButtonEventArgs) {
-            this.ClosePopup();
-            e.Handled = true;
+        private _HandleOverlayMouseButtonDown(sender: any, e: Fayde.Input.MouseButtonEventArgs) {
+            if (!e.Handled){
+                this.ClosePopup();
+                e.Handled = true;
+            }
+        }
+
+        private _HandleOverlayTouchDown(sender: any, e: Fayde.Input.TouchEventArgs) {
+            if (!e.Handled) {
+                this.ClosePopup();
+                e.Handled = true;
+            }
         }
 
         private _HandleContextMenuSizeChanged (sender: any, e: Fayde.SizeChangedEventArgs) {
@@ -131,6 +157,7 @@ module Fayde.Controls {
             this._Overlay = canvas1;
             this._Overlay.MouseLeftButtonDown.on(this._HandleOverlayMouseButtonDown, this);
             this._Overlay.MouseRightButtonDown.on(this._HandleOverlayMouseButtonDown, this);
+            this._Overlay.TouchDown.on(this._HandleOverlayTouchDown, this);
             this._Overlay.Children.Add(this);
 
             var popup = this._Popup = new Controls.Primitives.Popup();
