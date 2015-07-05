@@ -24,6 +24,400 @@ var Fayde;
     (function (Controls) {
         var Primitives;
         (function (Primitives) {
+            var DraggableControl = (function (_super) {
+                __extends(DraggableControl, _super);
+                function DraggableControl() {
+                    var _this = this;
+                    _super.call(this);
+                    this.PositionChanged = new nullstone.Event();
+                    this.Resized = new nullstone.Event();
+                    this._Transform = new Fayde.Media.TranslateTransform();
+                    this._CurrentPoint = null;
+                    this._SizingDirection = "";
+                    this.OffsetX = 0;
+                    this.OffsetY = 0;
+                    //#endregion
+                    //#region private functions
+                    this._DragStart = function (pos) {
+                        _this._CurrentPoint = pos;
+                        _this.Opacity *= 0.8;
+                        var zIndex = _this.GetValue(Fayde.Controls.Canvas.ZIndexProperty);
+                        if (zIndex > DraggableControl.MaxZIndex) {
+                            DraggableControl.MaxZIndex = zIndex + 1;
+                        }
+                        else if (zIndex < DraggableControl.MaxZIndex) {
+                            DraggableControl.MaxZIndex++;
+                        }
+                        _this.SetValue(Fayde.Controls.Panel.ZIndexProperty, DraggableControl.MaxZIndex);
+                    };
+                    this._DragMove = function (pos) {
+                        var newPoint = pos; // absolute position of the mouse
+                        if (_this._CurrentPoint !== null) {
+                            var change = new Point(newPoint.x - _this._CurrentPoint.x, newPoint.y - _this._CurrentPoint.y);
+                            //Make sure the Point is within Application.Current.RootVisual
+                            var parent = _this.VisualParent;
+                            var p0 = _this.TransformToVisual(parent).Transform(new Point(0, 0));
+                            if (_this._SizingDirection === "") {
+                                if (p0.x + change.x >= 0 &&
+                                    p0.y + change.x >= 0 &&
+                                    p0.x + change.x + _this.ActualWidth <= parent.ActualWidth &&
+                                    p0.y + change.y + _this.ActualHeight <= parent.ActualHeight) {
+                                    _this.OffsetX += change.x;
+                                    _this.OffsetY += change.y;
+                                    _this.PositionChanged.raise(_this, null);
+                                }
+                            }
+                            else {
+                                if (p0.x + change.x > 0 &&
+                                    p0.y + change.y > 0 &&
+                                    p0.x + change.x + _this.ActualWidth <= parent.ActualWidth &&
+                                    p0.y + change.y + _this.ActualHeight <= parent.ActualHeight) {
+                                    if (_this._SizingDirection.indexOf("n") > -1 && _this.ActualHeight - change.y > 2 &&
+                                        (_this.MaxHeight !== Number.NaN && _this.ActualHeight < _this.MaxHeight && change.y < 0 ||
+                                            _this.MinHeight !== Number.NaN && _this.ActualHeight > _this.MinHeight && change.y > 0)) {
+                                        _this.OffsetY += change.y;
+                                        _this.Height = _this.ActualHeight - change.y;
+                                        _this.PositionChanged.raise(_this, null);
+                                        _this.Resized.raise(_this, null);
+                                    }
+                                    if (_this._SizingDirection.indexOf("s") > -1 && _this.ActualHeight + change.y > 2 &&
+                                        (_this.MaxHeight !== Number.NaN && _this.ActualHeight < _this.MaxHeight && change.y > 0 ||
+                                            _this.MinHeight !== Number.NaN && _this.ActualHeight > _this.MinHeight && change.y < 0)) {
+                                        _this.Height = _this.ActualHeight + change.y;
+                                        _this.Resized.raise(_this, null);
+                                    }
+                                    if (_this._SizingDirection.indexOf("w") > -1 && _this.ActualWidth - change.x > 2 &&
+                                        (_this.MaxWidth !== Number.NaN && _this.ActualWidth < _this.MaxWidth && change.x < 0 ||
+                                            _this.MinWidth !== Number.NaN && _this.ActualWidth > _this.MinWidth && change.x > 0)) {
+                                        _this.OffsetX += change.x;
+                                        _this.Width = _this.ActualWidth - change.x;
+                                        _this.PositionChanged.raise(_this, null);
+                                        _this.Resized.raise(_this, null);
+                                    }
+                                    if (_this._SizingDirection.indexOf("e") > -1 && _this.ActualWidth + change.x > 2 &&
+                                        (_this.MaxWidth !== Number.NaN && _this.ActualWidth < _this.MaxWidth && change.x > 0 ||
+                                            _this.MinWidth !== Number.NaN && _this.ActualWidth > _this.MinWidth && change.x < 0)) {
+                                        _this.Width = _this.ActualWidth + change.x;
+                                        _this.Resized.raise(_this, null);
+                                    }
+                                }
+                            }
+                            _this._CurrentPoint = newPoint;
+                        }
+                        else {
+                            // Check to see if mouse is on a resize area
+                            if (_this.CanResize) {
+                                _this._ResizeHitTest(newPoint);
+                                _this._SetCursor();
+                            }
+                        }
+                    };
+                    this._DragEnd = function () {
+                        if (_this._CurrentPoint !== null) {
+                            _this.Opacity = 1;
+                            _this._CurrentPoint = null;
+                        }
+                        _this._SizingDirection = "";
+                    };
+                    this._ResizeHitTest = function (pt) {
+                        var x0 = pt.x;
+                        var y0 = pt.y;
+                        var P = _this.TransformToVisual(null).Transform(new Point(0, 0));
+                        var x1 = P.x;
+                        var y1 = P.y;
+                        var x2 = x1 + _this.ActualWidth;
+                        var y2 = y1 + _this.ActualHeight;
+                        // Corners
+                        if (Math.abs(x0 - x1) < 6 && Math.abs(y0 - y1) < 6) {
+                            _this._SizingDirection = "nw";
+                        }
+                        else if (Math.abs(x0 - x1) < 6 && Math.abs(y2 - y0) < 6) {
+                            _this._SizingDirection = "sw";
+                        }
+                        else if (Math.abs(x2 - x0) < 6 && Math.abs(y2 - y0) < 6) {
+                            _this._SizingDirection = "se";
+                        }
+                        else if (Math.abs(x2 - x0) < 6 && Math.abs(y0 - y1) < 6) {
+                            _this._SizingDirection = "ne";
+                        }
+                        else if (Math.abs(y0 - y1) < 4) {
+                            _this._SizingDirection = "n";
+                        }
+                        else if (Math.abs(x2 - x0) < 4) {
+                            _this._SizingDirection = "e";
+                        }
+                        else if (Math.abs(y2 - y0) < 4) {
+                            _this._SizingDirection = "s";
+                        }
+                        else if (Math.abs(x0 - x1) < 4) {
+                            _this._SizingDirection = "w";
+                        }
+                        else {
+                            _this._SizingDirection = "";
+                        }
+                    };
+                    this._SetCursor = function () {
+                        if (_this._SizingDirection === "n" || _this._SizingDirection === "s") {
+                            _this.Cursor = Fayde.CursorType.SizeNS;
+                        }
+                        else if (_this._SizingDirection === "w" || _this._SizingDirection === "e") {
+                            _this.Cursor = Fayde.CursorType.SizeWE;
+                        }
+                        else {
+                            _this.Cursor = Fayde.CursorType.Default;
+                        }
+                    };
+                    this.DefaultStyleKey = DraggableControl;
+                    this.RenderTransform = this._Transform;
+                }
+                Object.defineProperty(DraggableControl.prototype, "CanResize", {
+                    get: function () {
+                        return this.GetValue(DraggableControl.CanResizeProperty);
+                    },
+                    set: function (value) {
+                        this.SetValue(DraggableControl.CanResizeProperty, value);
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                DraggableControl.prototype._OnOffsetXChanged = function (oldValue, newValue) {
+                    if (oldValue !== newValue) {
+                        this._Transform.X = newValue;
+                    }
+                };
+                DraggableControl.prototype._OnOffsetYChanged = function (oldValue, newValue) {
+                    if (oldValue !== newValue) {
+                        this._Transform.Y = newValue;
+                    }
+                };
+                //#region Touch Event
+                DraggableControl.prototype.OnTouchDown = function (e) {
+                    _super.prototype.OnTouchDown.call(this, e);
+                    if (e.Handled) {
+                        return;
+                    }
+                    this._DragStart(e.GetTouchPoint(null).Position);
+                };
+                DraggableControl.prototype.OnTouchMove = function (e) {
+                    _super.prototype.OnTouchMove.call(this, e);
+                    if (e.Handled) {
+                        return;
+                    }
+                    this._DragMove(e.GetTouchPoint(null).Position);
+                };
+                DraggableControl.prototype.OnTouchUp = function (e) {
+                    _super.prototype.OnTouchUp.call(this, e);
+                    this._DragEnd();
+                };
+                //#endregion
+                //#region Mouse Event
+                DraggableControl.prototype.OnMouseLeftButtonDown = function (e) {
+                    _super.prototype.OnMouseLeftButtonDown.call(this, e);
+                    if (e.Handled) {
+                        return;
+                    }
+                    this.CaptureMouse();
+                    this._DragStart(e.GetPosition(null));
+                };
+                DraggableControl.prototype.OnMouseLeftButtonUp = function (e) {
+                    _super.prototype.OnMouseLeftButtonUp.call(this, e);
+                    this._DragEnd();
+                    this.ReleaseMouseCapture();
+                };
+                DraggableControl.prototype.OnMouseMove = function (e) {
+                    _super.prototype.OnMouseMove.call(this, e);
+                    this._DragMove(e.GetPosition(null));
+                };
+                DraggableControl.MaxZIndex = 1;
+                DraggableControl.CanResizeProperty = DependencyProperty.Register("CanResize", function () { return Boolean; }, DraggableControl, null);
+                DraggableControl.OffsetXProperty = DependencyProperty.Register("OffsetX", function () { return Number; }, DraggableControl, 0, function (d, args) { return d._OnOffsetXChanged(args.OldValue, args.NewValue); });
+                DraggableControl.OffsetYProperty = DependencyProperty.Register("OffsetY", function () { return Number; }, DraggableControl, 0, function (d, args) { return d._OnOffsetYChanged(args.OldValue, args.NewValue); });
+                return DraggableControl;
+            })(Fayde.Controls.ContentControl);
+            Primitives.DraggableControl = DraggableControl;
+        })(Primitives = Controls.Primitives || (Controls.Primitives = {}));
+    })(Controls = Fayde.Controls || (Fayde.Controls = {}));
+})(Fayde || (Fayde = {}));
+/// <reference path="primitives/draggablecontrol.ts" />
+var Fayde;
+(function (Fayde) {
+    var Controls;
+    (function (Controls) {
+        var ChildWindow = (function (_super) {
+            __extends(ChildWindow, _super);
+            function ChildWindow() {
+                _super.call(this);
+                this._ContentContainer = null;
+                this._ModalMask = null;
+                this._CloseButton = null;
+                this._MaximizeButton = null;
+                this._MinimizeButton = null;
+                this.DefaultStyleKey = ChildWindow;
+            }
+            ChildWindow.prototype._OnHeaderChanged = function (oldHeader, newHeader) {
+            };
+            ChildWindow.prototype._OnHeaderTemplateChanged = function (oldHeaderTemplate, newHeaderTemplate) {
+            };
+            ChildWindow.prototype._OnIsOpenChanged = function (oldValue, newValue) {
+                if (oldValue !== newValue) {
+                    if (newValue === true) {
+                        this.Visibility = Fayde.Visibility.Visible;
+                        if (this.IsModal) {
+                            if (this._ModalMask == null) {
+                                this._AddMask();
+                            }
+                            this._ModalMask.Visibility = Fayde.Visibility.Visible;
+                        }
+                    }
+                    else {
+                        this.Visibility = Fayde.Visibility.Collapsed;
+                        if (this.IsModal) {
+                            this._ModalMask.Visibility = Fayde.Visibility.Collapsed;
+                        }
+                    }
+                }
+            };
+            ChildWindow.prototype.OnApplyTemplate = function () {
+                if (this.IsModal) {
+                    this.ShowMaximizeButton = false;
+                    this.ShowMinimizeButton = false;
+                }
+                else if (this.CanResize) {
+                    this.ShowMaximizeButton = true;
+                    this.ShowMinimizeButton = true;
+                }
+                this._CloseButton = this.GetTemplateChild("CloseButton", Fayde.Controls.Button);
+                if (this._CloseButton != null) {
+                    this._CloseButton.Click.on(this._OnClose, this);
+                }
+                this._MinimizeButton = this.GetTemplateChild("MinimizeButton", Fayde.Controls.Button);
+                if (this._MinimizeButton != null) {
+                    if (this.ShowMinimizeButton) {
+                        this._MinimizeButton.Click.on(this._OnMinimize, this);
+                    }
+                    else {
+                        this._MinimizeButton.Visibility = Fayde.Visibility.Collapsed;
+                    }
+                }
+                this._MaximizeButton = this.GetTemplateChild("MaximizeButton", Fayde.Controls.Primitives.ToggleButton);
+                if (this._MaximizeButton != null) {
+                    if (this.ShowMaximizeButton) {
+                        this._MaximizeButton.Click.on(this._OnMaximize, this);
+                    }
+                    else {
+                        this._MaximizeButton.Visibility = Fayde.Visibility.Collapsed;
+                    }
+                }
+                this._ContentContainer = this.GetTemplateChild("ContentContainer", Fayde.Controls.Panel);
+                if (this._ContentContainer != null) {
+                    this._ContentContainer.MouseLeftButtonDown.on(function (sender, e) { e.Handled = true; }, this);
+                }
+                if (this.IsModal && this.IsOpen) {
+                    this._AddMask();
+                }
+                _super.prototype.OnApplyTemplate.call(this);
+            };
+            ChildWindow.prototype._OnClose = function (sender, e) {
+                this.IsOpen = false;
+            };
+            ChildWindow.prototype._OnDone = function (sender, e) {
+                this.IsOpen = false;
+            };
+            ChildWindow.prototype._OnMinimize = function (sender, e) {
+                this.Visibility = Fayde.Visibility.Collapsed;
+            };
+            ChildWindow.prototype._OnMaximize = function (sender, e) {
+                var b = sender;
+                if (b.IsChecked === true) {
+                    this._size0 = new Size();
+                    this._size0.width = this.ActualWidth;
+                    this._size0.height = this.ActualHeight;
+                    this._p0 = new Point(this.OffsetX, this.OffsetY);
+                    this.OffsetX = 0;
+                    this.OffsetY = 0;
+                    var p = this.VisualParent;
+                    this.Width = p.ActualWidth;
+                    this.Height = p.ActualHeight;
+                    this.Margin = new Thickness(0);
+                }
+                else {
+                    this.Restore();
+                }
+            };
+            ChildWindow.prototype.Open = function () {
+                this.IsOpen = true;
+            };
+            ChildWindow.prototype.Close = function () {
+                this.IsOpen = false;
+            };
+            ChildWindow.prototype.Restore = function () {
+                if (this._size0 != null) {
+                    this.Width = this._size0.width;
+                    this.Height = this._size0.height;
+                }
+                if (this._p0 != null) {
+                    this.OffsetX = this._p0.x;
+                    this.OffsetY = this._p0.y;
+                }
+            };
+            ChildWindow.prototype._AddMask = function () {
+                var p = this.VisualParent;
+                if (p == null) {
+                    this._ModalMask = this._GetChildControl("ModelMask", Fayde.Shapes.Rectangle);
+                }
+                else {
+                    this._ModalMask = this._GetChildControl("ModelMask", Fayde.Shapes.Rectangle, p);
+                }
+                this._ModalMask.VerticalAlignment = Fayde.VerticalAlignment.Stretch;
+                this._ModalMask.HorizontalAlignment = Fayde.HorizontalAlignment.Stretch;
+                this._ModalMask.Fill = new Fayde.Media.SolidColorBrush(Color.KnownColors.DimGray);
+                this._ModalMask.Opacity = 0.4;
+                this._ModalMask.SetValue(Fayde.Controls.Canvas.ZIndexProperty, ChildWindow.MaxZIndex);
+                ChildWindow.MaxZIndex++;
+                this.SetValue(Fayde.Controls.Canvas.ZIndexProperty, ChildWindow.MaxZIndex);
+            };
+            ChildWindow.prototype._GetChildControl = function (childName, type, parent) {
+                if (parent == null) {
+                    parent = Fayde.Application.Current.RootVisual;
+                }
+                if (parent != null) {
+                    var xamlObject = parent.Children.FindName(name);
+                    if (xamlObject != null) {
+                        var xobj = xamlObject.XamlNode.XObject;
+                        if (!type || (xobj instanceof type)) {
+                            return xobj;
+                        }
+                    }
+                    var control = new type.prototype.constructor();
+                    parent.Children.Add(control);
+                    return control;
+                }
+                else {
+                    throw new Exception("LayoutRoot Panel in the MainWindow is missing. Make sure to name the Root Panel in the MainWindow as LayoutRoot.");
+                }
+            };
+            ChildWindow.HeaderProperty = DependencyProperty.Register("Header", function () { return Object; }, ChildWindow, undefined, function (d, args) { return d._OnHeaderChanged(args.OldValue, args.NewValue); });
+            ChildWindow.HeaderTemplateProperty = DependencyProperty.Register("HeaderTemplate", function () { return Fayde.DataTemplate; }, ChildWindow, undefined, function (d, args) { return d._OnHeaderTemplateChanged(args.OldValue, args.NewValue); });
+            ChildWindow.IsModalProperty = DependencyProperty.Register("IsModal", function () { return Boolean; }, ChildWindow, false, null);
+            ChildWindow.ShowMaximizeButtonProperty = DependencyProperty.
+                Register("ShowMaximizeButton", function () { return Boolean; }, ChildWindow, false, null);
+            ChildWindow.ShowMinimizeButtonProperty = DependencyProperty.
+                Register("ShowMinimizeButton", function () { return Boolean; }, ChildWindow, false, null);
+            ChildWindow.IsOpenProperty = DependencyProperty.
+                Register("IsOpen", function () { return Boolean; }, ChildWindow, true, function (d, args) { return d._OnIsOpenChanged(args.OldValue, args.NewValue); });
+            return ChildWindow;
+        })(Controls.Primitives.DraggableControl);
+        Controls.ChildWindow = ChildWindow;
+        Controls.TemplateParts(ChildWindow, { Name: "WindowBorder", Type: Controls.Border }, { Name: "TitleBar", Type: Controls.Panel }, { Name: "Header", Type: Controls.ContentControl }, { Name: "Content", Type: Controls.ContentPresenter }, { Name: "MaximizeButton", Type: Fayde.Controls.Primitives.ToggleButton }, { Name: "MinimizeButton", Type: Fayde.Controls.Primitives.ButtonBase }, { Name: "CloseButton", Type: Fayde.Controls.Primitives.ButtonBase });
+        Controls.TemplateVisualStates(ChildWindow, { GroupName: "CommonStates", Name: "Normal" }, { GroupName: "CommonStates", Name: "Maximized" }, { GroupName: "CommonStates", Name: "Minimized" });
+    })(Controls = Fayde.Controls || (Fayde.Controls = {}));
+})(Fayde || (Fayde = {}));
+var Fayde;
+(function (Fayde) {
+    var Controls;
+    (function (Controls) {
+        var Primitives;
+        (function (Primitives) {
             var MenuBase = (function (_super) {
                 __extends(MenuBase, _super);
                 function MenuBase() {

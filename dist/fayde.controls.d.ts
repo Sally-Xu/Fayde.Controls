@@ -5,6 +5,73 @@ declare module Fayde.Controls {
     var Library: nullstone.ILibrary;
 }
 declare module Fayde.Controls.Primitives {
+    class DraggableControl extends Fayde.Controls.ContentControl {
+        constructor();
+        static MaxZIndex: number;
+        PositionChanged: nullstone.Event<nullstone.IEventArgs>;
+        Resized: nullstone.Event<nullstone.IEventArgs>;
+        private _Transform;
+        private _CurrentPoint;
+        private _SizingDirection;
+        static CanResizeProperty: DependencyProperty;
+        CanResize: boolean;
+        static OffsetXProperty: DependencyProperty;
+        static OffsetYProperty: DependencyProperty;
+        OffsetX: number;
+        OffsetY: number;
+        private _OnOffsetXChanged(oldValue, newValue);
+        private _OnOffsetYChanged(oldValue, newValue);
+        OnTouchDown(e: Fayde.Input.TouchEventArgs): void;
+        OnTouchMove(e: Fayde.Input.TouchEventArgs): void;
+        OnTouchUp(e: Fayde.Input.TouchEventArgs): void;
+        OnMouseLeftButtonDown(e: Fayde.Input.MouseButtonEventArgs): void;
+        OnMouseLeftButtonUp(e: Fayde.Input.MouseButtonEventArgs): void;
+        OnMouseMove(e: Fayde.Input.MouseButtonEventArgs): void;
+        private _DragStart;
+        private _DragMove;
+        private _DragEnd;
+        private _ResizeHitTest;
+        private _SetCursor;
+    }
+}
+declare module Fayde.Controls {
+    class ChildWindow extends Primitives.DraggableControl {
+        constructor();
+        private _ContentContainer;
+        private _ModalMask;
+        private _CloseButton;
+        private _MaximizeButton;
+        private _MinimizeButton;
+        private _size0;
+        private _p0;
+        static HeaderProperty: DependencyProperty;
+        Header: any;
+        private _OnHeaderChanged(oldHeader, newHeader);
+        static HeaderTemplateProperty: DependencyProperty;
+        HeaderTemplate: Fayde.DataTemplate;
+        private _OnHeaderTemplateChanged(oldHeaderTemplate, newHeaderTemplate);
+        static IsModalProperty: DependencyProperty;
+        IsModal: boolean;
+        static ShowMaximizeButtonProperty: DependencyProperty;
+        ShowMaximizeButton: boolean;
+        static ShowMinimizeButtonProperty: DependencyProperty;
+        ShowMinimizeButton: boolean;
+        static IsOpenProperty: DependencyProperty;
+        IsOpen: boolean;
+        private _OnIsOpenChanged(oldValue, newValue);
+        OnApplyTemplate(): void;
+        private _OnClose(sender, e);
+        private _OnDone(sender, e);
+        private _OnMinimize(sender, e);
+        private _OnMaximize(sender, e);
+        Open(): void;
+        Close(): void;
+        Restore(): void;
+        private _AddMask();
+        private _GetChildControl(childName, type?, parent?);
+    }
+}
+declare module Fayde.Controls.Primitives {
     class MenuBase extends Fayde.Controls.ItemsControl {
         static ItemContainerStyleProperty: DependencyProperty;
         ItemContainerStyle: Style;
