@@ -2469,6 +2469,7 @@
 
     <ResourceDictionary.MergedDictionaries>
       <ResourceDictionary Source="lib/fayde.controls/themes/assets/metro/Calendar.xml"/>
+      <ResourceDictionary Source="lib/fayde.controls/themes/assets/metro/ChildWindow.xml"/>
     </ResourceDictionary.MergedDictionaries>
    
 </ResourceDictionary>

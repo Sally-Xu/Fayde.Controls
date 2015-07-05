@@ -15,8 +15,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <StackPanel>
-            <HyperlinkButton TargetName="ContentFrame" NavigateUri="/gridsplitter" Content="Grid Splitter" />
-            <HyperlinkButton TargetName="ContentFrame" NavigateUri="/draggable" Content="Draggable Control" />
+            <HyperlinkButton TargetName="ContentFrame" NavigateUri="/gridsplitter" Content="Grid Splitter" />    
             <HyperlinkButton TargetName="ContentFrame" NavigateUri="/childwindow" Content="Child Window" />
             <HyperlinkButton TargetName="ContentFrame" NavigateUri="/numericupdown" Content="Numeric Up Down" />
             <HyperlinkButton TargetName="ContentFrame" NavigateUri="/domainupdown" Content="Domain Up Down" />

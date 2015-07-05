@@ -1,19 +1,61 @@
 <Page xmlns="http://schemas.wsick.com/fayde"
       xmlns:x="http://schemas.wsick.com/fayde/x"
+      xmlns:vms="viewmodels"
       xmlns:controls="lib://fayde.controls"
-      Title="ContextMenu Demo">
-    <Grid Margin="5">
-        <Border Background="Black" Padding="5" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock Foreground="White" Text="Right click me!">
-                <controls:ContextMenuService.ContextMenu>
-                    <controls:ContextMenu>
-                        <controls:MenuItem Header="Test 1"/>
-                        <controls:MenuItem Header="Test 2"/>
-                        <controls:Separator/>
-                        <controls:MenuItem Header="Test 3"/>
-                    </controls:ContextMenu>
-                </controls:ContextMenuService.ContextMenu>
-            </TextBlock>
-        </Border>
-    </Grid>
+      Title="ContextMenu Demo"
+      >
+  <Page.DataContext>
+    <vms:ContextMenuViewModel/>
+  </Page.DataContext>
+  <Grid Margin="5">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*" />
+      <RowDefinition Height="*" />
+    <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+      
+    <Border Grid.Row="0" Background="Black" Padding="5" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <TextBlock Foreground="White" Text="Right click me!">
+          <controls:ContextMenuService.ContextMenu>
+            <controls:ContextMenu>
+              <controls:MenuItem Header="Add">
+                <controls:MenuItem.Icon>
+                  <Rectangle Width="16" Height="16" Fill="Red"/>
+                </controls:MenuItem.Icon>
+              </controls:MenuItem>
+              <controls:MenuItem Header="Move Down">
+                <controls:MenuItem.Icon>
+                  <Rectangle Width="16" Height="16" Fill="Green"/>
+                </controls:MenuItem.Icon>
+              </controls:MenuItem>
+              <controls:Separator/>
+              <controls:MenuItem Header="Delete">
+                <controls:MenuItem.Icon>
+                  <Rectangle Width="16" Height="16" Fill="Blue"/>
+                </controls:MenuItem.Icon>
+              </controls:MenuItem>
+            </controls:ContextMenu>
+          </controls:ContextMenuService.ContextMenu>
+        </TextBlock>
+    </Border>
+
+    <TextBlock Grid.Row="1" MouseLeftButtonDown="{EventBinding Command={Binding Path=DataContext.MenuClickCmd, ElementName=Root, CommandParameter={Binding}}}" Text="Test" />
+    <Border Grid.Row="2" Background="Black" Padding="5" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="Root">
+      <TextBlock Foreground="White" Text="Right click me!">
+        <controls:ContextMenuService.ContextMenu>
+          <controls:ContextMenu ItemsSource="{Binding Menu}">
+            <controls:ContextMenu.ItemTemplate>
+              <DataTemplate>
+                <Border HorizontalAlignment="Strech" Background="Transparent" 
+                        TouchDown="{EventBinding Command={Binding Path=DataContext.MenuClickCmd, RelativeSource={RelativeSource ItemsControlParent}}, CommandParameter={Binding}}}" 
+                        MouseLeftButtonDown="{EventBinding Command={Binding Path=DataContext.MenuClickCmd, RelativeSource={RelativeSource ItemsControlParent}}, CommandParameter={Binding}}}" >     
+                  <TextBlock Text="{Binding Header}" />
+                </Border>
+              </DataTemplate>
+            </controls:ContextMenu.ItemTemplate>           
+          </controls:ContextMenu>
+        </controls:ContextMenuService.ContextMenu>
+      </TextBlock>
+    </Border>
+  </Grid>
 </Page>
