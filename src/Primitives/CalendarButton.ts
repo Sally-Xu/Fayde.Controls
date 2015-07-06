@@ -17,10 +17,10 @@
             return this._IsSelected;
         }
         set IsSelected(val: boolean) {
-            //if (val != this._IsSelected) {
+            if (val != this._IsSelected) {
                 this._IsSelected = val;
                 this.ChangeVisualState(true, "SelectionStates");
-            //}
+            }
         }
 
         private _IsInactive: boolean;
