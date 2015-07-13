@@ -321,9 +321,11 @@ module Fayde.Controls {
 
                 if (DateTime.Compare(time, this.DisplayDateStart.Date) < 0 || DateTime.Compare(time, this.DisplayDateEnd.Date) > 0) {
                     button.IsEnabled = false;
+                    button.Opacity = 0;
                 }
                 else {
                     button.IsEnabled = true;
+                    button.Opacity = 1;
                 }    
                 if (time.Year == this._CurrentMonth.Year && time.Month == this._CurrentMonth.Month) {
                     button.IsFocused = true;
@@ -385,9 +387,11 @@ module Fayde.Controls {
                     }
                     if ((num < this.DisplayDateStart.Year) || (num > this.DisplayDateEnd.Year)) {
                         button.IsEnabled = false;
+                        button.Opacity = 0;
                     }
                     else {
                         button.IsEnabled = true;
+                        button.Opacity = 1;
                     }
                    
                     button.IsInactive = (num < decade) || (num > decadeEnd);
