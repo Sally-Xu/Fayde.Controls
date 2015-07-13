@@ -163,8 +163,11 @@ module Fayde.Controls {
             this.SelectedDate = new DateTime(2015, 6, 15);
         }
 
-        OnApplyTemplate() {
+        OnApplyTemplate() {           
             super.OnApplyTemplate();
+            var day = new DateTime(2015, 11, 1);   
+            var day2 = day.AddDays(1);
+
             this.HeaderButton = <Button>this.GetTemplateChild("HeaderButton");
             if (this.HeaderButton != null) {
                 this.HeaderButton.Click.on(this._HandleHeaderButtonClick, this);
@@ -204,8 +207,11 @@ module Fayde.Controls {
         }
 
         private SetButtonState(childButton: Primitives.CalendarDayButton, dateToAdd: DateTime ) {   
-            if (dateToAdd < this.DisplayDateStart || dateToAdd > this.DisplayDateEnd) {
+            if (DateTime.Compare(dateToAdd, this.DisplayDateStart) < 0 || DateTime.Compare(dateToAdd, this.DisplayDateEnd) > 0) {
+                childButton.Opacity = 0;
                 childButton.IsEnabled = false;
+                childButton.IsSelected = false;
+                childButton.IsFocused = false;  
             }
             else {
                 if (this.BlackoutDates.ContainsDate(dateToAdd)) {
@@ -214,8 +220,11 @@ module Fayde.Controls {
                 else {
                     childButton.IsBlackout = false;
                 }
+                childButton.Opacity = 1;
                 childButton.IsEnabled = true;
-                childButton.IsInactive = dateToAdd.Month != this._CurrentMonth.Month;                    
+                childButton.IsInactive = dateToAdd.Month != this._CurrentMonth.Month;     
+                childButton.IsSelected = false;    
+                childButton.IsFocused = false;               
                 childButton.IsToday = this.IsTodayHighlighted && DateTime.Compare(dateToAdd.Date, DateTime.Today) == 0;
                 for (var i = 0; i < this.SelectedDates.Count; i++)
                 {
@@ -228,12 +237,9 @@ module Fayde.Controls {
                             this.FocusButton.IsFocused = false;
                         }
                         this.FocusButton = childButton;
-                    }
-                    else {
-                        childButton.IsFocused = false;
-                    }
+                    }                   
                 }
-                else if (DateTime.Compare(dateToAdd, this._CurrentMonth) == 0)
+                else if (DateTime.Compare(dateToAdd, new DateTime(this._CurrentMonth.Year, this._CurrentMonth.Month, 1)) == 0)
                     childButton.IsFocused = true;
             }
 
@@ -257,7 +263,7 @@ module Fayde.Controls {
                 this.SetButtonState(childButton, day);               
                 childButton.Content = day.Day;
                 childButton.DataContext = day;
-                if (day.Day < DateTime.MaxValue) {
+                if (day.Date < DateTime.MaxValue) {
                     day = day.AddDays(1);
                 }
                 else {
@@ -523,9 +529,9 @@ module Fayde.Controls {
         private _HandleCellClick(sender: any, e: Fayde.RoutedEventArgs) {
             var button = <Button>sender;          
             if (this.DisplayMode == CalendarMode.Month) {    
-                this.SelectedDate = <DateTime>button.DataContext; 
-                this._CurrentMonth = <DateTime>button.DataContext;                            
-                this.FocusButton = <Primitives.CalendarDayButton>button;                
+                this.SelectedDate = <DateTime>button.DataContext;                           
+                this.FocusButton = <Primitives.CalendarDayButton>button; 
+                this.CurrentMonth = <DateTime>button.DataContext;                     
             }
             else if (this.DisplayMode == CalendarMode.Year) {
                 this._CurrentMonth = <DateTime>button.DataContext;     

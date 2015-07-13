@@ -676,8 +676,7 @@ declare module Fayde.Controls {
 }
 declare module Fayde.Controls {
     class BlackDatesCollection extends Fayde.Collections.ObservableCollection<DateRange> {
-        private _Owner;
-        CalendarBlackoutDatesCollection(owner: Calendar): void;
+        CalendarBlackoutDatesCollection(): void;
         AddDatesInPast(): void;
         ContainsDate(date: DateTime): boolean;
     }
@@ -700,6 +699,7 @@ declare module Fayde.Controls.Primitives {
         private _IsInactive;
         IsInactive: boolean;
         constructor();
+        OnApplyTemplate(): void;
         protected ChangeVisualState(useTransitions: boolean, stateGroup?: string): void;
     }
 }
@@ -709,10 +709,7 @@ declare module Fayde.Controls.Primitives {
         IsBlackout: boolean;
         private _IsToday;
         IsToday: boolean;
-        private _ignoringMouseOverState;
         constructor();
-        OnApplyTemplate(): void;
-        IgnoreMouseOverState(): void;
         protected ChangeVisualState(useTransitions: boolean, stateGroup?: string): void;
     }
 }

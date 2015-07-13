@@ -132,7 +132,7 @@
                             </vsm:VisualState>
                             <vsm:VisualState x:Name="Disabled">
                               <Storyboard>
-                                <DoubleAnimation Storyboard.TargetName="IconPath" Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Opacity)" To=".5" Duration="0" />
+                                <DoubleAnimation Storyboard.TargetName="IconPath" Storyboard.TargetProperty="Opacity" To=".5" Duration="0" />
                               </Storyboard>
                             </vsm:VisualState>
                           </vsm:VisualStateGroup>
@@ -157,7 +157,7 @@
                             </vsm:VisualState>
                             <vsm:VisualState x:Name="Disabled">
                               <Storyboard>
-                                <DoubleAnimation Storyboard.TargetName="IconPath" Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Opacity)" To=".5" Duration="0" />
+                                <DoubleAnimation Storyboard.TargetName="IconPath" Storyboard.TargetProperty="Opacity" To=".5" Duration="0" />
                               </Storyboard>
                             </vsm:VisualState>
                           </vsm:VisualStateGroup>

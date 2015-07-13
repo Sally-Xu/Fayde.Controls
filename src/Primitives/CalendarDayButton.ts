@@ -23,38 +23,13 @@
             }
         }
 
-        private _ignoringMouseOverState: boolean;
-        
         constructor() {
             super();
             this.DefaultStyleKey = CalendarDayButton;
         }
-        
-        OnApplyTemplate() {
-            super.OnApplyTemplate();
-            this.ChangeVisualState(false);
-        }
-
-        public IgnoreMouseOverState() {
-            this._ignoringMouseOverState = false;
-            if (this.IsMouseOver) {
-                this._ignoringMouseOverState = true;
-                this.ChangeVisualState(true);
-            }
-        }
-        
-        protected ChangeVisualState(useTransitions: boolean, stateGroup: string = null) {
-            if (this._ignoringMouseOverState) {
-                if (this.IsPressed) {
-                    Media.VSM.VisualStateManager.GoToState(this, "Pressed", useTransitions);
-                }
-                if (this.IsEnabled) {
-                    Media.VSM.VisualStateManager.GoToState(this, "Normal", useTransitions);
-                }
-                else {
-                    Media.VSM.VisualStateManager.GoToState(this, "Disabled", useTransitions);
-                }
-            }
+               
+        protected ChangeVisualState(useTransitions: boolean, stateGroup: string = null) {                  
+            super.ChangeVisualState(useTransitions);          
             if (stateGroup == null || stateGroup == "DayStates") {
                 if (this.IsToday) {
                     Media.VSM.VisualStateManager.GoToState(this, "Today", useTransitions);
@@ -71,8 +46,7 @@
                 else {
                     Media.VSM.VisualStateManager.GoToState(this, "NormalDay", useTransitions);
                 }
-            }
-            super.ChangeVisualState(useTransitions);         
+            }             
         }     
     }
     TemplateVisualStates(CalendarDayButton,

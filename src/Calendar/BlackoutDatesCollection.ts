@@ -2,10 +2,7 @@
 
     export class BlackDatesCollection extends Fayde.Collections.ObservableCollection<DateRange> {
 
-        private _Owner : Calendar;
-
-        public CalendarBlackoutDatesCollection(owner: Calendar) {
-            this._Owner = owner;
+        public CalendarBlackoutDatesCollection() {
         }
 
         public AddDatesInPast()

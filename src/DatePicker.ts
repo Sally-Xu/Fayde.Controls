@@ -71,10 +71,7 @@
                 this._SelectionHandler.Dispose();
             this._SelectionHandler = new Internal.SelectionHandler([this._MonthTextBox, this._DayTextBox, this._YearTextBox]);
 
-            this._UpdateText();
-
-            console.log("SelectedDate on " + this.Name + " is DateTime? " + (this.SelectedDate instanceof DateTime));     
-            console.log("Type of SelectedDate on " + this.Name + " is " + (typeof this.SelectedDate));     
+            this._UpdateText();         
         }
 
         private CoerceMonth(month: any) {

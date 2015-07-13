@@ -28,7 +28,7 @@
             return this._IsInactive;
         }
         set IsInactive(val: boolean) {
-            if (val != this._IsSelected) {
+            if (val != this._IsInactive) {
                 this._IsInactive = val;
                 this.ChangeVisualState(true, "ActiveStates");
             }
@@ -40,7 +40,21 @@
             this.IsTabStop = false;
         }
 
-        protected ChangeVisualState(useTransitions: boolean, stateGroup : string = null) {            
+        OnApplyTemplate() {
+            super.OnApplyTemplate();
+            this.ChangeVisualState(false);
+        }
+
+        protected ChangeVisualState(useTransitions: boolean, stateGroup: string = null) {        
+            if (this.IsPressed) {
+                Media.VSM.VisualStateManager.GoToState(this, "Pressed", useTransitions);
+            }
+            if (this.IsEnabled) {
+                Media.VSM.VisualStateManager.GoToState(this, "Normal", useTransitions);
+            }
+            else {
+                Media.VSM.VisualStateManager.GoToState(this, "Disabled", useTransitions);
+            }        
             if (stateGroup == null || stateGroup == "SelectionStates") {
                 if (this.IsSelected) {
                     Media.VSM.VisualStateManager.GoToState(this, "Selected", useTransitions);
