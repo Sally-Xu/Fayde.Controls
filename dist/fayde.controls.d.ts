@@ -675,10 +675,11 @@ declare module Fayde.Controls {
     }
 }
 declare module Fayde.Controls {
-    class BlackDatesCollection extends Fayde.Collections.ObservableCollection<DateRange> {
+    class BlackoutDatesCollection extends Fayde.Collections.ObservableCollection<DateRange> {
         CalendarBlackoutDatesCollection(): void;
         AddDatesInPast(): void;
         ContainsDate(date: DateTime): boolean;
+        Contains(range: DateRange): boolean;
     }
 }
 declare module Fayde.Controls {
@@ -726,6 +727,8 @@ declare module Fayde.Controls {
         static CalendarButtonStyleProperty: DependencyProperty;
         static CalendarDayButtonStyleProperty: DependencyProperty;
         static CalendarStyleProperty: DependencyProperty;
+        static BlackoutDatesProperty: DependencyProperty;
+        static SelectedDatesProperty: DependencyProperty;
         IsTodayHighlighted: boolean;
         FirstDayOfWeek: DayOfWeek;
         DisplayDateStart: DateTime;
@@ -737,8 +740,8 @@ declare module Fayde.Controls {
         CalendarButtonStyle: Style;
         CalendarDayButtonStyle: Style;
         CalendarStyle: Style;
-        SelectedDates: Fayde.Collections.ObservableCollection<DateTime>;
-        BlackoutDates: BlackDatesCollection;
+        SelectedDates: Collections.ObservableCollection<DateTime>;
+        BlackoutDates: BlackoutDatesCollection;
         private _OnFirstDayOfWeekChanged(oldValue, newValue);
         private _OnDisplayDateChanged(oldValue, newValue);
         private _OnDisplayDateStartChanged(oldValue, newValue);

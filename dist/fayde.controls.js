@@ -3409,26 +3409,35 @@ var Fayde;
 (function (Fayde) {
     var Controls;
     (function (Controls) {
-        var BlackDatesCollection = (function (_super) {
-            __extends(BlackDatesCollection, _super);
-            function BlackDatesCollection() {
+        var BlackoutDatesCollection = (function (_super) {
+            __extends(BlackoutDatesCollection, _super);
+            function BlackoutDatesCollection() {
                 _super.apply(this, arguments);
             }
-            BlackDatesCollection.prototype.CalendarBlackoutDatesCollection = function () {
+            BlackoutDatesCollection.prototype.CalendarBlackoutDatesCollection = function () {
             };
-            BlackDatesCollection.prototype.AddDatesInPast = function () {
+            BlackoutDatesCollection.prototype.AddDatesInPast = function () {
                 this.Add(new Controls.DateRange(DateTime.MinValue, DateTime.Today.AddDays(-1)));
             };
-            BlackDatesCollection.prototype.ContainsDate = function (date) {
+            BlackoutDatesCollection.prototype.ContainsDate = function (date) {
                 for (var i = 0; i < this.Count; i++) {
                     if (this.GetValueAt(i).IsInRange(date))
                         return true;
                 }
                 return false;
             };
-            return BlackDatesCollection;
+            BlackoutDatesCollection.prototype.Contains = function (range) {
+                for (var i = 0; i < this.Count; i++) {
+                    var r = this.GetValueAt(i);
+                    if ((DateTime.Compare(r.Start, range.Start) == 0) && (DateTime.Compare(r.End, range.End) == 0)) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+            return BlackoutDatesCollection;
         })(Fayde.Collections.ObservableCollection);
-        Controls.BlackDatesCollection = BlackDatesCollection;
+        Controls.BlackoutDatesCollection = BlackoutDatesCollection;
     })(Controls = Fayde.Controls || (Fayde.Controls = {}));
 })(Fayde || (Fayde = {}));
 var Fayde;
@@ -3628,8 +3637,6 @@ var Fayde;
             //#endregion
             function Calendar() {
                 _super.call(this);
-                this.SelectedDates = new Fayde.Collections.ObservableCollection();
-                this.BlackoutDates = new Controls.BlackDatesCollection();
                 //#endregion
                 //#region Private Members
                 this._CurrentMonth = DateTime.Today;
@@ -3743,6 +3750,26 @@ var Fayde;
                 },
                 set: function (value) {
                     this.SetValue(Calendar.CalendarStyleProperty, value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Calendar.prototype, "SelectedDates", {
+                get: function () {
+                    return this.GetValue(Calendar.SelectedDatesProperty);
+                },
+                set: function (value) {
+                    this.SetValue(Calendar.SelectedDatesProperty, value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Calendar.prototype, "BlackoutDates", {
+                get: function () {
+                    return this.GetValue(Calendar.BlackoutDatesProperty);
+                },
+                set: function (value) {
+                    this.SetValue(Calendar.BlackoutDatesProperty, value);
                 },
                 enumerable: true,
                 configurable: true
@@ -3925,9 +3952,11 @@ var Fayde;
                     button.IsInactive = false;
                     if (DateTime.Compare(time, this.DisplayDateStart.Date) < 0 || DateTime.Compare(time, this.DisplayDateEnd.Date) > 0) {
                         button.IsEnabled = false;
+                        button.Opacity = 0;
                     }
                     else {
                         button.IsEnabled = true;
+                        button.Opacity = 1;
                     }
                     if (time.Year == this._CurrentMonth.Year && time.Month == this._CurrentMonth.Month) {
                         button.IsFocused = true;
@@ -3982,9 +4011,11 @@ var Fayde;
                         }
                         if ((num < this.DisplayDateStart.Year) || (num > this.DisplayDateEnd.Year)) {
                             button.IsEnabled = false;
+                            button.Opacity = 0;
                         }
                         else {
                             button.IsEnabled = true;
+                            button.Opacity = 1;
                         }
                         button.IsInactive = (num < decade) || (num > decadeEnd);
                     }
@@ -4254,6 +4285,8 @@ var Fayde;
             Calendar.CalendarButtonStyleProperty = DependencyProperty.Register("CalendarButtonStyle", function () { return Fayde.Style; }, Calendar, null);
             Calendar.CalendarDayButtonStyleProperty = DependencyProperty.Register("CalendarDayButtonStyle", function () { return Fayde.Style; }, Calendar, null);
             Calendar.CalendarStyleProperty = DependencyProperty.Register("CalendarStyle", function () { return Fayde.Style; }, Calendar, null);
+            Calendar.BlackoutDatesProperty = DependencyProperty.Register("BlackoutDates", function () { return Controls.BlackoutDatesCollection; }, Calendar, new Controls.BlackoutDatesCollection());
+            Calendar.SelectedDatesProperty = DependencyProperty.Register("SelectedDates", function () { return Fayde.Collections.ObservableCollection; }, Calendar, new Fayde.Collections.ObservableCollection());
             return Calendar;
         })(Controls.Control);
         Controls.Calendar = Calendar;

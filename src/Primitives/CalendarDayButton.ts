@@ -27,9 +27,10 @@
             super();
             this.DefaultStyleKey = CalendarDayButton;
         }
-               
-        protected ChangeVisualState(useTransitions: boolean, stateGroup: string = null) {                  
-            super.ChangeVisualState(useTransitions);          
+        
+        
+        protected ChangeVisualState(useTransitions: boolean, stateGroup: string = null) {
+            super.ChangeVisualState(useTransitions);       
             if (stateGroup == null || stateGroup == "DayStates") {
                 if (this.IsToday) {
                     Media.VSM.VisualStateManager.GoToState(this, "Today", useTransitions);
@@ -46,7 +47,8 @@
                 else {
                     Media.VSM.VisualStateManager.GoToState(this, "NormalDay", useTransitions);
                 }
-            }             
+            }
+                 
         }     
     }
     TemplateVisualStates(CalendarDayButton,

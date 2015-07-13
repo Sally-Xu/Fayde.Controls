@@ -18,9 +18,11 @@ module Fayde.Controls {
         static SelectionModeProperty: DependencyProperty = DependencyProperty.Register("SelectionMode", () => CalendarSelectionMode, Calendar, CalendarSelectionMode.SingleDate, (d, args) => (<Calendar>d)._OnSelectiondModeChanged);
         static CalendarButtonStyleProperty: DependencyProperty = DependencyProperty.Register("CalendarButtonStyle", () => Style, Calendar, null);
         static CalendarDayButtonStyleProperty: DependencyProperty = DependencyProperty.Register("CalendarDayButtonStyle", () => Style, Calendar, null);
-
         static CalendarStyleProperty: DependencyProperty = DependencyProperty.Register("CalendarStyle", () => Style, Calendar, null);
         
+        static BlackoutDatesProperty: DependencyProperty = DependencyProperty.Register("BlackoutDates", () => BlackoutDatesCollection, Calendar, new BlackoutDatesCollection());
+        static SelectedDatesProperty: DependencyProperty = DependencyProperty.Register("SelectedDates", () => Collections.ObservableCollection, Calendar, new Collections.ObservableCollection<DateTime>());
+       
         get IsTodayHighlighted(): boolean {
             return this.GetValue(Calendar.IsTodayHighlightedProperty);
         }
@@ -97,8 +99,19 @@ module Fayde.Controls {
             this.SetValue(Calendar.CalendarStyleProperty, value);
         }
 
-        SelectedDates: Fayde.Collections.ObservableCollection<DateTime> = new Fayde.Collections.ObservableCollection<DateTime>();
-        BlackoutDates: BlackDatesCollection = new BlackDatesCollection();
+        get SelectedDates(): Collections.ObservableCollection<DateTime> {
+            return this.GetValue(Calendar.SelectedDatesProperty);
+        }
+        set SelectedDates(value: Collections.ObservableCollection<DateTime> ) {
+            this.SetValue(Calendar.SelectedDatesProperty, value);
+        }
+
+        get BlackoutDates(): BlackoutDatesCollection {
+            return this.GetValue(Calendar.BlackoutDatesProperty);
+        }
+        set BlackoutDates(value: BlackoutDatesCollection) {
+            this.SetValue(Calendar.BlackoutDatesProperty, value);
+        }
 
         private _OnFirstDayOfWeekChanged(oldValue: DayOfWeek, newValue: DayOfWeek) {
         }
