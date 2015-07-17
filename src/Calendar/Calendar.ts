@@ -368,20 +368,20 @@ module Fayde.Controls {
         private SetMonthModeHeaderButton()
         {
             if (this.HeaderButton != null) {
-                this.HeaderButton.Content = this._CurrentMonth.toString("MMMM yyyy");
+                this.HeaderButton.Content = this._CurrentMonth.toString("y");
                 this.HeaderButton.IsEnabled = true;                
             }
         }
         
         private SetMonthModeNextButton() {
             if (this.NextButton != null) {
-                this.NextButton.IsEnabled = DateTime.Compare(this.DisplayDateEnd, this.CurrentMonth.AddMonths(1)) > 0;
+                this.NextButton.IsEnabled = DateTime.Compare(this.DisplayDateEnd, new DateTime(this.CurrentMonth.Year, this.CurrentMonth.Month, 1).AddMonths(1)) >= 0;
             }
         }
         
         private SetMonthModePreviousButton() {
             if (this.PreviousButton != null) {
-                this.PreviousButton.IsEnabled = DateTime.Compare(this.DisplayDateStart, this.CurrentMonth.AddMonths(-1)) < 0;
+                this.PreviousButton.IsEnabled = DateTime.Compare(this.DisplayDateStart, new DateTime(this.CurrentMonth.Year, this.CurrentMonth.Month, 1).AddMonths(-1)) <= 0;
             }
         }
         

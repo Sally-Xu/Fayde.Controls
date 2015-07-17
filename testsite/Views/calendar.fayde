@@ -11,7 +11,7 @@
       <StackPanel>
         <controls:Calendar BlackoutDates='{Binding BlackoutDates}' SelectedDates='{Binding SelectedDates}' SelectionMode="SingleRange">
         </controls:Calendar>
-        <controls:Calendar SelectedDate='07/08/2015' DisplayDateStart='07/01/2015' DisplayDateEnd='08/15/2015' >
+        <controls:Calendar SelectedDate='07/08/2015' DisplayDateStart='07/15/2015' DisplayDateEnd='08/15/2015' >
         </controls:Calendar>
 
         <controls:DatePicker SelectedDate='07/08/2015'/>
